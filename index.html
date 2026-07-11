@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>微谷云数据</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:system-ui;max-width:800px;margin:20px auto;padding:0 16px;background:#f5f6f8}
+.card{background:#fff;padding:16px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.count{font-size:32px;font-weight:700;color:#3370FF}
+pre{background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow:auto;font-size:12px;max-height:500px}
+</style></head>
+<body><h1>📊 微谷云商务数据快照</h1>
+<div id="info" class="card">加载中...</div>
+<div id="data"></div>
+<h2>原始数据</h2>
+<pre id="raw">loading...</pre>
+<script>
+fetch('data.json').then(r=>r.json()).then(d=>{
+  document.getElementById('raw').textContent=JSON.stringify(d,null,2);
+  document.getElementById('info').innerHTML='<strong>⏰ 最后更新:</strong> '+(d.updated||'未知')+'<br><strong>📦 数据源:</strong> 飞书多维表格';
+  const cards=[
+    {k:'contracts',label:'合同',icon:'📄'},
+    {k:'talents',label:'达人',icon:'⭐'},
+    {k:'checkins',label:'打卡',icon:'✅'},
+    {k:'payments',label:'回款',icon:'💰'}
+  ];
+  document.getElementById('data').innerHTML=cards.map(c=>
+    '<div class="card"><div class="count">'+(d[c.k]?d[c.k].length:0)+'</div>'+c.icon+' '+c.label+'</div>'
+  ).join('');
+}).catch(e=>{document.getElementById('info').textContent='❌ 加载失败: '+e.message});
+</script></body></html>
