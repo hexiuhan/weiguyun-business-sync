@@ -9,50 +9,123 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
 jobs:
-  sync:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Build pages
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Build static site
+        env:
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
         run: |
-          mkdir -p .github/sync
-          echo '{"updated":"'$(date -Iseconds)'","source":"feishu-base"}' > data.json
-          cat > index.html << 'HTML'
+          mkdir -p public
+          cat > public/index.html << 'HTML'
           <!DOCTYPE html>
-          <html><head><meta charset="utf-8"><title>微谷云数据</title>
+          <html lang="zh-CN">
+          <head><meta charset="utf-8"><title>微谷云商务数据</title>
           <meta name="viewport" content="width=device-width,initial-scale=1">
-          <style>body{font-family:system-ui;max-width:800px;margin:20px auto;padding:0 16px;background:#f5f6f8}
-          .card{background:#fff;padding:16px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-          .count{font-size:32px;font-weight:700;color:#3370FF}
-          pre{background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow:auto;font-size:12px;max-height:500px}
+          <style>
+          body{font-family:system-ui,sans-serif;max-width:900px;margin:20px auto;padding:0 16px;background:#f5f6f8;color:#222}
+          h1{color:#3370FF;font-size:18px;margin-bottom:12px}
+          .info{background:#E8F3FF;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;line-height:1.6}
+          .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+          .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+          .count{font-size:32px;font-weight:700;color:#3370FF;margin-bottom:4px}
+          .label{font-size:13px;color:#666}
+          pre{background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow:auto;font-size:12px;max-height:600px;margin-top:20px}
+          .empty{color:#999;font-size:13px}
           </style></head>
-          <body><h1>📊 微谷云商务数据快照</h1>
-          <div id="info" class="card">加载中...</div>
-          <div id="data"></div>
-          <h2>原始数据</h2>
-          <pre id="raw">loading...</pre>
-          <script>
-          fetch('data.json').then(r=>r.json()).then(d=>{
-            document.getElementById('raw').textContent=JSON.stringify(d,null,2);
-            document.getElementById('info').innerHTML='<strong>⏰ 最后更新:</strong> '+(d.updated||'未知')+'<br><strong>📦 数据源:</strong> 飞书多维表格';
-            const cards=[
-              {k:'contracts',label:'合同',icon:'📄'},
-              {k:'talents',label:'达人',icon:'⭐'},
-              {k:'checkins',label:'打卡',icon:'✅'},
-              {k:'payments',label:'回款',icon:'💰'}
-            ];
-            document.getElementById('data').innerHTML=cards.map(c=>
-              '<div class="card"><div class="count">'+(d[c.k]?d[c.k].length:0)+'</div>'+c.icon+' '+c.label+'</div>'
-            ).join('');
-          }).catch(e=>{document.getElementById('info').textContent='❌ 加载失败: '+e.message});
-          </script></body></html>
+          <body>
+            <h1>📊 微谷云商务数据快照</h1>
+            <div id="info" class="info">⏰ 加载中...</div>
+            <div id="data" class="grid"></div>
+            <details><summary style="cursor:pointer;color:#888;font-size:12px">查看原始数据</summary>
+            <pre id="raw">loading...</pre></details>
+            <script>
+            fetch('./data.json').then(r=>r.json()).then(d=>{
+              const updated = d._updated || d.updated || '未知';
+              const errors = d._errors || [];
+              let info = '<strong>⏰ 最后同步:</strong> ' + updated;
+              info += '<br><strong>📦 数据源:</strong> 飞书多维表格';
+              if (errors.length) info += '<br><strong>⚠️ 错误:</strong> ' + errors.join('; ');
+              document.getElementById('info').innerHTML = info;
+              const cards = [
+                {k:'contracts',label:'合同',icon:'📄'},
+                {k:'talents',label:'达人',icon:'⭐'},
+                {k:'checkins',label:'打卡',icon:'✅'},
+                {k:'payments',label:'回款',icon:'💰'}
+              ];
+              let html = '';
+              cards.forEach(c => {
+                const n = (d[c.k] || []).length;
+                html += '<div class="card"><div class="count">' + n + '</div><div class="label">' + c.icon + ' ' + c.label + '</div></div>';
+              });
+              document.getElementById('data').innerHTML = html || '<div class="empty">暂无数据</div>';
+              document.getElementById('raw').textContent = JSON.stringify(d, null, 2);
+            }).catch(e => {
+              document.getElementById('info').innerHTML = '❌ 加载失败: ' + e.message;
+            });
+            </script>
+          </body></html>
           HTML
-      - uses: stefanzweifel/git-auto-commit-action@v5
+          if [ -n "$FEISHU_APP_ID" ] && [ -n "$FEISHU_APP_SECRET" ]; then
+            TOKEN=$(curl -s -X POST https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal -H "Content-Type: application/json" -d "{\"app_id\":\"$FEISHU_APP_ID\",\"app_secret\":\"$FEISHU_APP_SECRET\"}" | python3 -c "import sys,json;print(json.load(sys.stdin).get('tenant_access_token',''))")
+            if [ -n "$TOKEN" ]; then
+              echo '{"_updated":"'$(date -Iseconds)'","contracts":[],"talents":[],"checkins":[],"payments":[]}' > public/data.json
+              for ENTRY in "contracts:tblH6KquRZTg8tMv" "talents:tblsac4Cn0pykBmk" "checkins:tblyg1tdZRgp03rV" "payments:tblU3kU0VZPSMCTg"; do
+                KEY=${ENTRY%:*}
+                TID=${ENTRY#*:}
+                curl -s "https://open.feishu.cn/open-apis/bitable/v1/apps/Mi2HbPUY1aQCFwsHY9gcDmMvnah/tables/$TID/records?page_size=500" -H "Authorization: Bearer $TOKEN" -o "_${KEY}.json"
+              done
+              python3 -c "
+import json, os, datetime
+result = {'_updated': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'), '_errors': []}
+for key in ['contracts', 'talents', 'checkins', 'payments']:
+    fname = f'_{key}.json'
+    if os.path.exists(fname):
+        try:
+            d = json.load(open(fname))
+            items = []
+            for it in d.get('data', {}).get('items', []):
+                fields = {}
+                for k, v in it.get('fields', {}).items():
+                    if isinstance(v, list) and v and isinstance(v[0], dict) and 'text' in v[0]:
+                        fields[k] = v[0]['text']
+                    elif isinstance(v, list) and v and isinstance(v[0], dict) and 'name' in v[0]:
+                        fields[k] = v[0]['name']
+                    else:
+                        fields[k] = v
+                items.append({'_id': it.get('record_id'), **fields})
+            result[key] = items
+        except Exception as e:
+            result['_errors'].append(f'{key}: {e}')
+            result[key] = []
+    else:
+        result[key] = []
+json.dump(result, open('public/data.json', 'w'), ensure_ascii=False, indent=2)
+"
+              rm -f _*.json
+            else
+              echo '{"_updated":"'$(date -Iseconds)'","_errors":["无法获取 Feishu token"],"contracts":[],"talents":[],"checkins":[],"payments":[]}' > public/data.json
+            fi
+          else
+            echo '{"_updated":"'$(date -Iseconds)'","_errors":["未配置 Feishu Secrets"],"contracts":[],"talents":[],"checkins":[],"payments":[]}' > public/data.json
+          fi
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          commit_message: "sync: data snapshot"
-      - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
-      - uses: actions/deploy-pages@v4
+          path: public
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
