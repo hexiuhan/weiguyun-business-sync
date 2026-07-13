@@ -1,28 +1,2466 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>微谷云数据</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>body{font-family:system-ui;max-width:800px;margin:20px auto;padding:0 16px;background:#f5f6f8}
-.card{background:#fff;padding:16px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.count{font-size:32px;font-weight:700;color:#3370FF}
-pre{background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow:auto;font-size:12px;max-height:500px}
-</style></head>
-<body><h1>📊 微谷云商务数据快照</h1>
-<div id="info" class="card">加载中...</div>
-<div id="data"></div>
-<h2>原始数据</h2>
-<pre id="raw">loading...</pre>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>微谷云商务 v23</title>
+<style>
+:root{
+  --g:#07C160;--gd:#06AD56;--gl:#E8F8EF;--r:#FA5151;--y:#FFC300;--b:#1989FA;
+  --bg:#F5F6FA;--card:#fff;--tx:#1A1A2E;--t2:#6C7293;--t3:#B2BEC3;
+  --br:#E8E8E8;--sh:0 1px 3px rgba(0,0,0,.06);--sh2:0 4px 12px rgba(0,0,0,.1);
+  --rds:10px;--rds2:6px;--safe:env(safe-area-inset-bottom,12px);
+  --ph0:#E84393;--ph1:#6C5CE7;--ph2:#0984E3;--ph3:#00B894;
+  --ph4:#FD79A8;--ph5:#F39C12;--ph6:#00CEC9;--ph7:#636E72;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+input,select,textarea,button{font-family:inherit;font-size:inherit}
+a{color:var(--g);text-decoration:none}
+
+/* Login */
+.login-wrap{position:fixed;inset:0;background:linear-gradient(160deg,#1AAD5A,#07C160,#06AD56);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px}
+.login-card{background:#fff;border-radius:24px;padding:40px 32px;width:100%;max-width:380px;box-shadow:0 16px 60px rgba(0,0,0,.25);text-align:center}
+.login-card .logo{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#07C160,#1AAD5A);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;box-shadow:0 8px 24px rgba(7,193,96,.3)}
+.login-card h2{font-size:24px;font-weight:800;margin-bottom:4px;color:var(--tx);letter-spacing:-.5px}
+.login-card .sub{font-size:13px;color:var(--t2);margin-bottom:28px;font-weight:400}
+.login-input{width:100%;border:2px solid #E8ECF0;border-radius:12px;padding:14px 16px;font-size:15px;outline:none;margin-bottom:12px;transition:all .2s;background:#F8FAFB}
+.login-input:focus{border-color:var(--g);background:#fff;box-shadow:0 0 0 4px rgba(7,193,96,.08)}
+.login-input::placeholder{color:#B2BEC3}
+.login-error{color:var(--r);font-size:12px;margin-bottom:4px;min-height:18px;font-weight:500}
+.login-btn{width:100%;border:0;background:linear-gradient(135deg,#07C160,#1AAD5A);color:#fff;padding:15px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;box-shadow:0 4px 16px rgba(7,193,96,.25)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(7,193,96,.35)}
+.login-hint{font-size:11px;color:#B2BEC3;margin-top:16px;line-height:1.7}
+
+/* App Layout */
+.app-wrap{display:none;min-height:100vh;padding-bottom:70px}
+.app-wrap.active{display:block}
+/* Header */
+.app-hd{background:var(--g);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.app-hd h1{font-size:16px;font-weight:700}
+.app-hd .role-badge{font-size:11px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:12px}
+.app-hd .hd-actions{display:flex;gap:8px;align-items:center}
+.app-hd .hd-btn{background:rgba(255,255,255,.2);border:0;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.pc-sidebar{display:none}
+
+/* Bottom Tab */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid var(--br);z-index:100;padding-bottom:var(--safe);box-shadow:0 -2px 8px rgba(0,0,0,.04)}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 4px;cursor:pointer;color:var(--t3);transition:color .15s;font-size:10px;border:0;background:none}
+.tab-item .ti{font-size:22px;margin-bottom:2px}
+.tab-item.on{color:var(--g);font-weight:600}
+
+/* Main Content */
+.main-content{padding:12px}
+
+/* Stats Cards */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--card);border-radius:var(--rds);padding:14px;box-shadow:var(--sh)}
+.stat-card .sv{font-size:26px;font-weight:800;line-height:1.2}
+.stat-card .sl{font-size:11px;color:var(--t2);margin-top:2px}
+.stat-card .st{font-size:10px;font-weight:600;margin-top:4px}
+.stat-card .st.up{color:var(--g)}.stat-card .st.down{color:var(--r)}
+.stat-card.full{grid-column:1/-1}
+
+/* Section */
+.section{margin-bottom:14px}
+.section-title{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.section-title .more{font-size:12px;color:var(--g);font-weight:500}
+
+/* Quick Actions */
+.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.qa-item{background:var(--card);border-radius:var(--rds);padding:16px 8px;text-align:center;cursor:pointer;box-shadow:var(--sh);transition:all .15s;border:0;font-family:inherit}
+.qa-item:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.qa-item .qai{font-size:32px;display:block;margin-bottom:4px}
+.qa-item .qan{font-size:12px;font-weight:600;color:var(--tx)}
+
+/* Contract List */
+.ct-list{display:flex;flex-direction:column;gap:8px}
+.ct-card{background:var(--card);border-radius:var(--rds);padding:14px;box-shadow:var(--sh);cursor:pointer;transition:all .15s;border-left:4px solid transparent}
+.ct-card:hover{transform:translateY(-1px);box-shadow:var(--sh2)}
+.ct-card.p0{border-left-color:var(--ph0)}.ct-card.p1{border-left-color:var(--ph1)}
+.ct-card.p2{border-left-color:var(--ph2)}.ct-card.p3{border-left-color:var(--ph3)}
+.ct-card.p4{border-left-color:var(--ph4)}.ct-card.p5{border-left-color:var(--ph5)}
+.ct-card.p6{border-left-color:var(--ph6)}.ct-card.p7{border-left-color:var(--ph7)}
+.ct-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.ct-brand{font-weight:700;font-size:15px}
+.ct-money{font-weight:700;color:var(--r);font-size:14px}
+.ct-mid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;font-size:11px;color:var(--t2)}
+.ct-mid span{background:#F5F6FA;padding:2px 8px;border-radius:10px}
+.ct-bot{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.ct-phase{font-weight:600;padding:2px 8px;border-radius:10px;font-size:10px}
+.ct-phase.p0{background:#FFF0F7;color:var(--ph0)}.ct-phase.p1{background:#F3F0FF;color:var(--ph1)}
+.ct-phase.p2{background:#F0F7FF;color:var(--ph2)}.ct-phase.p3{background:#F0FDF8;color:var(--ph3)}
+.ct-phase.p4{background:#FFF0F6;color:var(--ph4)}.ct-phase.p5{background:#FFF9E6;color:var(--ph5)}
+.ct-phase.p6{background:#E0FFFA;color:var(--ph6)}.ct-phase.p7{background:#F1F3F4;color:var(--ph7)}
+.ct-action{color:var(--b);font-weight:600}
+
+/* Filters */
+.filters{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px}
+.filter-chip{padding:6px 14px;border-radius:20px;border:1px solid var(--br);background:#fff;font-size:12px;white-space:nowrap;cursor:pointer;color:var(--t2);transition:all .15s}
+.filter-chip.on{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+@media(min-width:768px){.modal-overlay{align-items:center}}
+.modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 -4px 24px rgba(0,0,0,.15)}
+@media(min-width:768px){.modal{border-radius:16px;max-height:85vh}}
+.modal-hd{padding:14px 18px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1}
+.modal-hd h3{font-size:16px;font-weight:700}
+.modal-close{border:0;background:#f5f6fa;width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2)}
+.modal-bd{padding:16px 18px}
+.modal-ft{padding:12px 18px;border-top:1px solid var(--br);display:flex;gap:8px;justify-content:flex-end}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-item{display:flex;flex-direction:column}
+.form-item.full{grid-column:1/-1}
+.form-label{font-size:12px;color:var(--t2);margin-bottom:4px;font-weight:500}
+.form-label .req{color:var(--r)}
+.form-input,.form-select{border:1px solid var(--br);border-radius:var(--rds2);padding:10px 12px;font-size:14px;outline:none;width:100%;background:#fff}
+.form-input:focus,.form-select:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(7,193,96,.08)}
+textarea.form-input{resize:vertical;min-height:60px}
+.form-input:disabled{background:#f5f6fa;color:var(--t2)}
+
+/* Talent rows in form */
+.talent-rows{margin-top:6px}
+.talent-row{background:#f8f9fa;border-radius:var(--rds2);padding:12px;margin-bottom:8px;position:relative}
+.talent-row-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.talent-row-hd span{font-size:13px;font-weight:700}
+.del-talent{border:0;background:#f8d7da;color:#721c24;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px}
+.talent-row-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.talent-row-grid .tr-full{grid-column:1/-1}
+.talent-label{font-size:10px;color:var(--t2);margin-bottom:2px}
+.talent-input,.talent-select{border:1px solid var(--br);border-radius:4px;padding:7px 8px;font-size:12px;outline:none;width:100%;background:#fff}
+.talent-input:focus,.talent-select:focus{border-color:var(--g)}
+textarea.talent-input{resize:vertical;min-height:40px}
+.add-talent-btn{border:1px dashed var(--g);background:var(--gl);color:var(--g);padding:10px;border-radius:var(--rds2);cursor:pointer;font-size:13px;font-weight:600;width:100%;text-align:center;margin-top:4px}
+
+/* Buttons */
+.btn{border:0;padding:10px 20px;border-radius:var(--rds2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+.btn-green{background:var(--g);color:#fff}.btn-green:hover{background:var(--gd)}
+.btn-white{background:#fff;border:1px solid var(--br);color:var(--tx)}.btn-white:hover{background:#f5f6fa}
+.btn-red{background:var(--r);color:#fff}.btn-red:hover{opacity:.9}
+.btn-blue{background:var(--b);color:#fff}.btn-blue:hover{opacity:.9}
+.btn-block{width:100%;justify-content:center}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* Detail */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.detail-item{background:#f8f9fa;border-radius:var(--rds2);padding:8px 10px}
+.detail-label{font-size:10px;color:var(--t2)}
+.detail-value{font-size:13px;font-weight:600;margin-top:2px}
+.detail-value.money{color:var(--r)}
+/* Phase stepper */
+.phase-stepper{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.ph-step{padding:6px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--br);background:#fff;color:var(--t2)}
+.ph-step.active{border-color:var(--g);background:var(--gl);color:var(--g)}
+.ph-step.done{background:#E8F8EF;border-color:#07C16040;color:var(--g)}
+/* Talent detail blocks */
+.talent-block{background:#f8f9fa;border-radius:var(--rds2);padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--b)}
+.talent-block .tb-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.talent-block .tb-name{font-weight:700;font-size:14px}
+.talent-block .tb-fee{color:var(--r);font-weight:700}
+.talent-block .tb-row{display:flex;flex-wrap:wrap;gap:6px;font-size:11px;margin-top:3px}
+.talent-block .tb-row span{background:#fff;padding:2px 8px;border-radius:10px;color:var(--t2);font-weight:500}
+
+/* Check-in */
+.checkin-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+.checkin-item{background:#f8f9fa;border-radius:var(--rds2);padding:8px 10px;font-size:11px;display:flex;justify-content:space-between;align-items:center}
+.checkin-item .ci-date{font-weight:600;color:var(--tx)}
+.checkin-item .ci-content{color:var(--t2)}
+.checkin-item .ci-gmv{color:var(--r);font-weight:600}
+
+/* Todo */
+.todo-list{display:flex;flex-direction:column;gap:8px}
+.todo-item{background:var(--card);border-radius:var(--rds);padding:14px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px;cursor:pointer;border-left:4px solid transparent}
+.todo-item.urgent{border-left-color:var(--r);background:#FFF5F5}
+.todo-item.warn{border-left-color:var(--y);background:#FFFDEB}
+.todo-item.normal{border-left-color:var(--b)}
+.todo-item .todo-icon{font-size:28px;flex-shrink:0}
+.todo-item .todo-info{flex:1;min-width:0}
+.todo-item .todo-title{font-size:14px;font-weight:600}
+.todo-item .todo-desc{font-size:11px;color:var(--t2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.todo-item .todo-urgent{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:700;flex-shrink:0}
+.todo-item .todo-urgent.u{background:#FFF0F0;color:var(--r)}
+.todo-item .todo-urgent.w{background:#FFF8E0;color:#B8860B}
+.todo-item .todo-urgent.n{background:#F0F7FF;color:var(--b)}
+.todo-item .todo-arrow{color:var(--t3);font-size:18px;flex-shrink:0}
+
+/* Dashboard */
+.dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.dash-kpi{background:var(--card);border-radius:var(--rds);padding:16px;box-shadow:var(--sh);text-align:center}
+.dash-kpi .dk-num{font-size:30px;font-weight:800}
+.dash-kpi .dk-label{font-size:11px;color:var(--t2);margin-top:2px}
+.dash-kpi.full{grid-column:1/-1}
+.dash-chart{background:var(--card);border-radius:var(--rds);padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+.dash-chart h4{font-size:13px;font-weight:700;margin-bottom:10px}
+/* Bar chart */
+.bar-chart{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-label{font-size:11px;color:var(--t2);width:60px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:20px;background:#f0f2f5;border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px;transition:width .5s;min-width:4px}
+.bar-count{font-size:11px;font-weight:700;width:24px;text-align:left;flex-shrink:0}
+/* Table mini */
+.mini-table{width:100%;font-size:11px;border-collapse:collapse}
+.mini-table th{text-align:left;padding:6px 8px;color:var(--t2);font-weight:600;border-bottom:2px solid var(--br);background:#f8f9fa}
+.mini-table td{padding:6px 8px;border-bottom:1px solid var(--br)}
+.mini-table .right{text-align:right}
+
+/* Empty state */
+.empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty .ei{font-size:48px;display:block;margin-bottom:8px}
+.empty .et{font-size:14px;font-weight:600;color:var(--t2)}
+
+/* Toast */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:300;pointer-events:none;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+
+/* PC layout */
+@media(min-width:768px){
+  .app-wrap{padding-bottom:0;max-width:1200px;margin:0 auto}
+  .app-hd{border-radius:var(--rds);margin:10px;position:relative}
+  .tab-bar{position:static;border-radius:0 0 var(--rds) var(--rds);margin:0 10px 10px;box-shadow:none}
+  .main-content{padding:10px}
+  .stats-row{grid-template-columns:repeat(4,1fr)}
+  .dash-kpis{grid-template-columns:repeat(4,1fr)}
+  .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-grid{grid-template-columns:1fr 1fr 1fr}
+  .quick-actions{grid-template-columns:repeat(6,1fr)}
+  .detail-grid{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* Alert */
+.alert{background:#FFF3CD;border:1px solid #FFC107;border-radius:var(--rds2);padding:10px 14px;font-size:12px;color:#856404;margin-bottom:10px}
+.alert-info{background:#F0F7FF;border-color:#1989FA40;color:#004085}
+
+/* Progress bar */
+.pbar-w{width:100%;margin:2px 0}
+.pbar{background:#f0f2f5;border-radius:4px;height:6px;overflow:hidden;display:inline-block;width:calc(100% - 40px);vertical-align:middle}
+.pfill{height:100%;border-radius:4px;transition:width .4s}
+.pfill.act{background:var(--g)}
+.pfill.done{background:var(--b)}
+.ptxt{font-size:10px;color:var(--t2);margin-left:4px;vertical-align:middle}
+
+/* Risk indicators on contract cards */
+.ct-card.risk-r{border-left-color:var(--r)!important;background:#FFF5F5}
+.ct-card.risk-y{border-left-color:var(--y)!important;background:#FFFDEB}
+.ct-card.risk-n{border-left-color:var(--b)!important}
+.ct-risk{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px}
+.ct-risk.r{background:#FFF0F0;color:var(--r)}
+.ct-risk.y{background:#FFF8E0;color:#B8860B}
+.ct-risk.n{background:#F0F7FF;color:var(--b)}
+
+/* Payment records */
+.payment-list{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto}
+.payment-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f8f9fa;border-radius:var(--rds2);font-size:12px;border-left:3px solid var(--g)}
+.payment-item .pay-amount{font-weight:700;color:var(--g)}
+.payment-total{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--br);margin-top:8px;font-weight:700}
+
+/* Image thumbnails */
+.img-thumb{max-width:100px;max-height:60px;border-radius:4px;cursor:pointer;border:1px solid var(--br)}
+.img-full{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.img-full img{max-width:90vw;max-height:90vh;border-radius:8px}
+.upload-area{border:2px dashed var(--br);border-radius:var(--rds2);padding:20px;text-align:center;cursor:pointer;transition:all .2s;color:var(--t2);font-size:12px}
+.upload-area:hover{border-color:var(--g);background:var(--gl)}
+/* Import selection */
+tr.selected{background:#E8F8EF!important}
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Login -->
+<div class="login-wrap" id="loginWrap">
+<div class="login-card">
+<div class="logo">WG</div>
+<h2>微谷云商务</h2>
+<div class="sub">商务全流程管理系统</div>
+<input class="login-input" id="loginName" placeholder="请输入姓名" autocomplete="username">
+<input class="login-input" type="text" id="loginPwd" placeholder="请输入6位数字密码" autocomplete="current-password">
+<div class="login-error" id="loginError"></div>
+<button class="login-btn" onclick="doLogin()">登 录</button>
+<div class="login-hint">仅限已注册用户 · 联系管理员开通账号</div>
+</div>
+</div>
+
+<!-- App -->
+<div class="app-wrap" id="appWrap">
+
+<!-- Header -->
+<div class="app-hd">
+<h1 id="hdTitle">📊 微谷云商务</h1>
+<div class="hd-actions">
+<span class="role-badge" id="roleBadge"></span>
+<button class="hd-btn" onclick="openChangePwd()" title="修改密码">🔑</button>
+<button class="hd-btn" onclick="doLogout()" title="退出">↩</button>
+</div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content" id="mainContent"></div>
+
+<!-- Bottom Tab -->
+<nav class="tab-bar" id="tabBar">
+<button class="tab-item on" data-tab="home"><span class="ti">🏠</span>首页</button>
+<button class="tab-item" data-tab="contracts"><span class="ti">📋</span>合同</button>
+<button class="tab-item" data-tab="todos"><span class="ti">📌</span>待办</button>
+<button class="tab-item" data-tab="dashboard"><span class="ti">📈</span>看板</button>
+</nav>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modalBox"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-fetch('data.json').then(r=>r.json()).then(d=>{
-  document.getElementById('raw').textContent=JSON.stringify(d,null,2);
-  document.getElementById('info').innerHTML='<strong>⏰ 最后更新:</strong> '+(d.updated||'未知')+'<br><strong>📦 数据源:</strong> 飞书多维表格';
-  const cards=[
-    {k:'contracts',label:'合同',icon:'📄'},
-    {k:'talents',label:'达人',icon:'⭐'},
-    {k:'checkins',label:'打卡',icon:'✅'},
-    {k:'payments',label:'回款',icon:'💰'}
-  ];
-  document.getElementById('data').innerHTML=cards.map(c=>
-    '<div class="card"><div class="count">'+(d[c.k]?d[c.k].length:0)+'</div>'+c.icon+' '+c.label+'</div>'
-  ).join('');
-}).catch(e=>{document.getElementById('info').textContent='❌ 加载失败: '+e.message});
-</script></body></html>
+// === Data Store (localStorage + GitHub Pages + Feishu Base) ===
+// Token is NOT hardcoded (would leak in public repo / trigger push protection).
+// Each device stores its own token locally after the user pastes it once.
+let GH_TOKEN = localStorage.getItem('wgy_gh_token')||'';
+function saveToken(t){ GH_TOKEN=(t||'').trim(); localStorage.setItem('wgy_gh_token',GH_TOKEN); markSynced('Token已设置'); }
+function openCloudSettings(){
+  const box=document.getElementById('modalBox');
+  const ov=document.getElementById('modalOverlay');
+  box.innerHTML='<div class="modal-card"><h3>☁️ 云端同步设置</h3>'+
+    '<p style="font-size:12px;color:#666;line-height:1.6">粘贴 GitHub Token（仅保存在本机浏览器，不会上传到任何地方）。它用于把数据写回云端，实现手机/电脑多端实时同步。可在 github.com → Settings → Developer settings 生成。</p>'+
+    '<input id="tokInput" class="inp" type="text" placeholder="ghp_..." style="width:100%;margin-top:8px" value="'+ (GH_TOKEN?GH_TOKEN.slice(0,6)+'****':'') +'">'+
+    '<div style="margin-top:14px;text-align:right"><button class="btn btn-white" onclick="closeModal()">取消</button> '+
+    '<button class="btn btn-blue" onclick="doSaveToken()">保存</button></div></div>';
+  ov.classList.add('show');
+}
+function doSaveToken(){ const v=document.getElementById('tokInput').value.trim(); if(!v){toast('请输入Token');return;} saveToken(v); closeModal(); toast('✅ Token已保存，现在可同步'); pushToGitHub(store); }
+function ensureTokenBtn(){
+  let el=document.getElementById('wgyTokenBtn');
+  if(!el){
+    el=document.createElement('div');
+    el.id='wgyTokenBtn';
+    el.textContent='⚙️';
+    el.title='云端同步设置';
+    el.style.cssText='position:fixed;right:10px;top:10px;z-index:9999;width:34px;height:34px;line-height:34px;text-align:center;background:#fff;color:#3370FF;font-size:18px;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer';
+    el.onclick=openCloudSettings;
+    document.body.appendChild(el);
+  }
+  return el;
+}
+const GH_RAW = 'https://raw.githubusercontent.com/hexiuhan/weiguyun-business-sync/main/data.json';
+const GH_API = 'https://api.github.com/repos/hexiuhan/weiguyun-business-sync/contents/data.json';
+const STORAGE_KEY = 'wgy_business_v2';
+const USER_KEY = 'wgy_users_v1';
+const LAST_SYNC_KEY = 'wgy_last_sync_v2';
+const PHASES = ['启动','审核确认','助理执行','达人执行','汇总确认','财务结算','回款跟进','归档'];
+const PHASE_COLORS = ['p0','p1','p2','p3','p4','p5','p6','p7'];
+const ACTIONS = ['待总监确认','待分配达人','待达人执行','待助理汇总','待总监审核','待财务结算','待回款跟进','待归档'];
+
+function getStore(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{contracts:[],checkins:[],talents:[],brands:[],thirdParties:[]}}catch(e){return{contracts:[],checkins:[],talents:[],brands:[],thirdParties:[]}}
+}
+function saveStore(s){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(s));
+  updateBadge();
+  // Push to GitHub (non-blocking, read-modify-write inside)
+  pushToGitHub(s);
+}
+function getLastSync(){return localStorage.getItem(LAST_SYNC_KEY)||''}
+function setLastSync(t){if(t)localStorage.setItem(LAST_SYNC_KEY,t)}
+
+// Merge cloud into local store: keep local-only records, resolve same-id conflicts by recency.
+// Payments live INSIDE each contract (c.payments) and are carried along with the contract merge.
+function mergeCloudInto(local, cloud){
+  if(!cloud||!cloud.contracts)return local;
+  const out=JSON.parse(JSON.stringify(local));
+  const arr=['contracts','talents','checkins','brands','thirdParties'];
+  arr.forEach(key=>{
+    const lArr=out[key]||[]; const cArr=cloud[key]||[];
+    const lMap=new Map(lArr.map(x=>[x.id,x]));
+    const cMap=new Map(cArr.map(x=>[x.id,x]));
+    const merged=[];
+    lArr.forEach(x=>{ if(!cMap.has(x.id)) merged.push(x); }); // local-only kept
+    cArr.forEach(x=>{
+      const lx=lMap.get(x.id);
+      if(!lx){ merged.push(x); }              // cloud-only added
+      else {
+        const lt=lx.updatedAt||'', ct=x.updatedAt||'';
+        merged.push(ct>lt?x:lx);              // newer wins
+      }
+    });
+    out[key]=merged;
+  });
+  return out;
+}
+
+// Stable signature to detect REAL changes (avoids spurious re-render from key reordering)
+function storeSig(s){
+  const a=['contracts','talents','checkins','brands','thirdParties'];
+  const counts=a.map(k=>(s[k]||[]).length).join(',');
+  const ids=(s.contracts||[]).map(c=>c.id+':'+c.phase+':'+(c.payments||[]).length).join('|');
+  return counts+'#'+ids;
+}
+
+// Cache-busted pull from GitHub + merge into `into`. Always returns a store (merged or original).
+async function pullLatest(into){
+  try{
+    const r=await fetch(GH_RAW+'?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return into;
+    const d=await r.json();
+    if(d&&d.contracts){ return mergeCloudInto(into,d); }
+  }catch(e){}
+  return into;
+}
+
+// READ-MODIFY-WRITE: pull latest, merge, then push the merged result so we never clobber
+// data created on another device.
+async function pushToGitHub(s){
+  if(!GH_TOKEN){ markSynced('未设Token·仅本地保存'); return; }
+  try{
+    const merged=await pullLatest(JSON.parse(JSON.stringify(s)));
+    store=merged;
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(merged));
+    const exportTime=new Date().toISOString();
+    const g=await fetch(GH_API,{headers:{Authorization:'token '+GH_TOKEN}});
+    const gd=await g.json();
+    const data={exportTime,contracts:merged.contracts,talents:merged.talents,checkins:merged.checkins,brands:merged.brands,thirdParties:merged.thirdParties};
+    const body={message:'sync: '+exportTime.split('T')[0],content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2)))),branch:'main'};
+    if(gd.sha)body.sha=gd.sha;
+    const res=await fetch(GH_API,{method:'PUT',headers:{Authorization:'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(res.ok){ setLastSync(exportTime); markSynced('已推送 '+exportTime.slice(11,19)); }
+  }catch(e){}
+}
+
+// Pull cloud and merge. Returns true only if data actually changed.
+async function loadFromCloud(force){
+  try{
+    const before=storeSig(store);
+    store=await pullLatest(store);
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(store));
+    const after=storeSig(store);
+    if(after!==before){ markSynced('已拉取 '+new Date().toISOString().slice(11,19)); return true; }
+    return false;
+  }catch(e){}
+  return false;
+}
+
+// Manual two-way sync button
+async function startFeishuSync(){
+  toast('☁️ 正在与云端双向同步...');
+  await pushToGitHub(store);
+  const changed=await loadFromCloud(true);
+  updateBadge(); renderTab(currentTab);
+  toast(changed?'✅ 已与云端双向同步（有更新）':'✅ 已与云端双向同步（无变化）');
+}
+
+// Persistent sync-status chip (bottom-right) so sync is verifiable, not claimed.
+function ensureSyncChip(){
+  let el=document.getElementById('wgySyncChip');
+  if(!el){
+    el=document.createElement('div');
+    el.id='wgySyncChip';
+    el.style.cssText='position:fixed;right:10px;bottom:10px;z-index:9999;background:#E8F3FF;color:#1f5fbf;font-size:12px;padding:6px 10px;border-radius:20px;box-shadow:0 1px 4px rgba(0,0,0,.15);max-width:60vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+function markSynced(txt){
+  try{ const el=ensureSyncChip(); el.textContent='☁️ 云端 '+txt; }catch(e){}
+}
+
+// Background auto-sync: pull+merge every 12s while app is open (skips while a modal/form is open)
+function startAutoSync(){
+  if(window.__wgyAutoSync)return;
+  ensureSyncChip();
+  window.__wgyAutoSync=setInterval(async()=>{
+    if(!currentUser)return;
+    const modal=document.getElementById('modalBox');
+    if(modal&&modal.innerHTML.trim())return;
+    const changed=await loadFromCloud(false);
+    if(changed){ updateBadge(); renderTab(currentTab); }
+  },12000);
+}
+
+// Trash
+let trashBin=[];
+function getTrash(){try{return JSON.parse(localStorage.getItem('wgy_trash_v1'))||[]}catch(e){return[]}}
+function saveTrash(){localStorage.setItem('wgy_trash_v1',JSON.stringify(trashBin))}
+function moveToTrash(type,item){
+  trashBin=getTrash();
+  trashBin.unshift({type,item,deletedAt:new Date().toISOString()});
+  if(trashBin.length>20)trashBin=trashBin.slice(0,20);
+  saveTrash();
+  updateBadge();
+}
+function getUsers(){
+  try{return JSON.parse(localStorage.getItem(USER_KEY))||{}}catch(e){return{}}
+}
+function saveUsers(u){localStorage.setItem(USER_KEY,JSON.stringify(u))}
+
+// Audit log
+const AUDIT_KEY='wgy_audit_v1';
+function getAuditLog(){try{return JSON.parse(localStorage.getItem(AUDIT_KEY))||[]}catch(e){return[]}}
+function addAuditLog(action,target,details){
+  const log=getAuditLog();
+  log.unshift({user:currentUser,role:currentRole,action,target,details,timestamp:new Date().toISOString()});
+  if(log.length>500)log.length=500;
+  localStorage.setItem(AUDIT_KEY,JSON.stringify(log));
+}
+function clearAuditLog(){
+  localStorage.setItem(AUDIT_KEY,'[]');
+}
+
+let store=getStore();
+let users=getUsers();
+let currentRole='director';
+let currentUser='';
+let currentTab='home';
+
+// Init user accounts if needed
+if(!users['admin']){
+  users['admin']={name:'管理者',role:'director',pwd:'admin888'};
+  const seed={
+    '拳爸':{name:'拳爸',role:'talent',pwd:'123456'},
+    '皮皮奶爸':{name:'皮皮奶爸',role:'talent',pwd:'123456'},
+    '念念妈':{name:'念念妈',role:'talent',pwd:'123456'},
+    '行走的奶粉桶':{name:'行走的奶粉桶',role:'talent',pwd:'123456'},
+    '熊嘉琳':{name:'熊嘉琳',role:'director',pwd:'123456'},
+    '财务':{name:'财务',role:'finance',pwd:'888888'},
+    '商务助理':{name:'商务助理',role:'assistant',pwd:'123456'},
+    '流程总监':{name:'流程总监',role:'flow_director',pwd:'123456'},
+  };
+  Object.assign(users,seed);
+  saveUsers(users);
+}
+// Ensure arrays
+if(!store.talents)store.talents=[];
+if(!store.brands)store.brands=[];
+if(!store.thirdParties)store.thirdParties=[];
+
+// === Utils ===
+function fmt(n){return Number(n).toLocaleString('zh-CN')}
+function phaseTag(p){return `<span class="ct-phase ${PHASE_COLORS[p]}">${PHASES[p]}</span>`}
+function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
+function genId(p='C'){return p+String(store.contracts.length+1).padStart(3,'0')}
+function getTalentCheckins(talentName,contractId){
+  return store.checkins.filter(c=>c.talentName===talentName&&c.contractId===contractId)
+}
+function getContractCheckins(contractId){
+  return store.checkins.filter(c=>c.contractId===contractId)
+}
+function daysAgo(dateStr){
+  const diff=Math.floor((new Date()-new Date(dateStr))/(86400000));
+  return diff;
+}
+
+// === Login ===
+function doLogin(){
+  const name=document.getElementById('loginName').value.trim();
+  const pwd=document.getElementById('loginPwd').value.trim();
+  const errEl=document.getElementById('loginError');
+  if(!name){errEl.textContent='请输入姓名';return}
+  if(!pwd){errEl.textContent='请输入密码';return}
+
+  if(users[name]){
+    if(users[name].pwd!==pwd){errEl.textContent='密码错误';return}
+    currentRole=users[name].role;
+  }else{
+    errEl.textContent='账号未注册，请联系管理员添加';
+    return;
+  }
+  errEl.textContent='';
+  currentUser=name;
+  document.getElementById('loginWrap').style.display='none';
+  document.getElementById('appWrap').classList.add('active');
+  startAutoSync();
+  ensureTokenBtn();
+  document.getElementById('roleBadge').textContent={
+    director:'👔 商务总监',assistant:'💼 商务助理',finance:'💰 财务总监',talent:'🎯 达人',flow_director:'🔍 流程总监'
+  }[currentRole]||currentRole;
+  addAuditLog('登录','系统',currentRole);
+  // Auto-load cloud data on login (non-blocking)
+  loadFromCloud().then(ok=>{
+    if(ok){
+      switchTab('home');
+      toast('✅ 已从云端加载最新数据');
+    }else{
+      switchTab('home');
+    }
+  }).catch(()=>switchTab('home'));
+  if(!GH_TOKEN){ setTimeout(openCloudSettings,900); }
+}
+
+function doLogout(){
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('appWrap').classList.remove('active');
+  closeModal();
+  document.getElementById('loginName').value='';
+  document.getElementById('loginPwd').value='';
+}
+
+function openChangePwd(){
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>🔑 修改密码</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-bd">
+    <div style="font-size:12px;color:var(--t2);margin-bottom:12px">当前用户：<strong>${currentUser}</strong>（${currentRole}）</div>
+    <input class="form-input" type="text" id="newPwd" placeholder="输入6位数字新密码" maxlength="6" style="font-size:18px;text-align:center;letter-spacing:4px">
+    <div style="font-size:10px;color:var(--t3);margin:6px 0">密码为6位数字，修改后立即生效</div>
+    <button class="btn btn-blue btn-block" onclick="changePwd()" style="margin-top:8px">确认修改</button>
+    <button class="btn btn-white btn-block" onclick="closeModal()">取消</button>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function changePwd(){
+  const pwd=document.getElementById('newPwd').value.trim();
+  if(!/^\d{6}$/.test(pwd)){toast('请输入6位数字密码');return}
+  const all=getUsers();
+  if(!all[currentUser]){toast('用户不存在');return}
+  all[currentUser].pwd=pwd;
+  saveUsers(all);
+  users=all;
+  closeModal();
+  toast('✅ 密码已修改为：'+pwd);
+  addAuditLog('修改密码',currentUser,'密码已更新');
+}
+
+// === Tab Navigation ===
+document.getElementById('tabBar').addEventListener('click',e=>{
+  const btn=e.target.closest('.tab-item');
+  if(!btn)return;
+  switchTab(btn.dataset.tab);
+});
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab-item').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  const hd=document.getElementById('hdTitle');
+  const titles={home:'📊 微谷云商务',contracts:'📋 合同管理',todos:'📌 我的待办',dashboard:'📈 数据看板'};
+  hd.textContent=titles[tab]||'📊 微谷云商务';
+  renderTab(tab);
+}
+
+function updateBadge(){
+  const cnt=getMyTodos().length;
+  const tab=document.querySelector('.tab-item[data-tab="todos"]');
+  if(tab)tab.innerHTML=`<span class="ti">📌</span>待办${cnt?`<sup style="color:var(--r);font-weight:800;font-size:12px">${cnt}</sup>`:''}`;
+}
+
+// === Render ===
+function renderTab(tab){
+  const mc=document.getElementById('mainContent');
+  if(tab==='home')renderHome(mc);
+  else if(tab==='contracts')renderContracts(mc);
+  else if(tab==='todos')renderTodos(mc);
+  else if(tab==='dashboard')renderDashboard(mc);
+}
+
+// === Home ===
+function renderHome(mc){
+  const myTodos=getMyTodos();
+  const urgTodos=myTodos.filter(t=>t.urgency==='urgent');
+
+  // Role-specific home
+  if(currentRole==='talent'){
+    const myContracts=store.contracts.filter(c=>c.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)));
+    const myCheckins=store.checkins.filter(ci=>ci.talentName===currentUser||currentUser.includes(ci.talentName));
+    const today=new Date().toISOString().split('T')[0];
+    const todayCheckins=myCheckins.filter(ci=>ci.date===today);
+    const myGMV=myCheckins.reduce((s,c)=>s+(c.gmv||0),0);
+    mc.innerHTML=`
+      <div class="alert">🎯 欢迎，${currentUser}！以下是你的执行项目</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="sv">${myContracts.length}</div><div class="sl">我的合同</div></div>
+        <div class="stat-card"><div class="sv" style="color:#FF9500">¥${fmt(myGMV)}</div><div class="sl">累计GMV</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--g)">${myCheckins.length}</div><div class="sl">打卡次数</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--b)">${todayCheckins.length}</div><div class="sl">今日已打卡</div></div>
+      </div>
+      <div class="section"><div class="section-title">快捷操作</div>
+        <div class="quick-actions">
+          <button class="qa-item" onclick="openCheckinForm()"><span class="qai">✅</span><span class="qan">执行打卡</span></button>
+          <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">📋</span><span class="qan">我的合同</span></button>
+          <button class="qa-item" onclick="switchTab('dashboard')"><span class="qai">📈</span><span class="qan">我的数据</span></button>
+        </div>
+      </div>
+      <div class="section"><div class="section-title">我的执行项目</div>
+        ${myContracts.map(c=>{
+          const myTalent=c.talents.find(t=>t.name===currentUser||currentUser.includes(t.name));
+          const chk=getTalentCheckins(myTalent?.name||currentUser,c.id);
+          const myGMV=chk.reduce((s,ci)=>s+(ci.gmv||0),0);
+          // Date progress
+          const start=new Date(myTalent?.startDate||c.signDate);
+          const end=new Date(myTalent?.endDate||c.dueDate);
+          const now=new Date();
+          const totalDays=Math.max(1,(end-start)/(86400000));
+          const elapsed=Math.min(totalDays,Math.max(0,(now-start)/(86400000)));
+          const datePct=Math.round(elapsed/totalDays*100);
+          // Execution progress (based on checkin count vs expected)
+          const expectedChecks=Math.max(1,Math.ceil(totalDays/3));
+          const execPct=Math.min(100,Math.round(chk.length/expectedChecks*100));
+          const statusLabel=c.phase<2?'待启动':c.phase===2?'待执行':c.phase===3?'执行中':c.phase===4?'已完成':c.phase>4&&c.phase<7?'结算中':c.phase===7?'已归档':'';
+          return `<div class="ct-card ${PHASE_COLORS[c.phase]}" onclick="openContractDetail('${c.id}')">
+            <div class="ct-top"><div><div class="ct-brand">${c.brandName} · ${c.contractName}</div><span style="font-size:11px;color:var(--t2)">${myTalent?.startDate||''} ~ ${myTalent?.endDate||''}</span></div><span class="ct-money">¥${fmt(myTalent?.fee||0)}</span></div>
+            <div class="ct-mid"><span>打卡${chk.length}次</span><span>GMV ¥${fmt(myGMV)}</span><span style="color:${c.phase===3?'var(--g)':'var(--t2)'}">${statusLabel}</span></div>
+            <div style="margin:4px 0">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:2px"><span>档期进度 ${datePct}%</span></div>
+              <div class="pbar-w"><div class="pbar"><div class="pfill ${c.phase>=4?'done':'act'}" style="width:${datePct}%"></div></div></div>
+            </div>
+            ${c.phase===3?`
+            <div style="margin:4px 0">
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:2px"><span>执行进度 ${execPct}%</span></div>
+              <div class="pbar-w"><div class="pbar"><div class="pfill act" style="width:${execPct}%"></div></div></div>
+            </div>`:''}
+            <div class="ct-bot">${phaseTag(c.phase)} ${c.phase===3?`<button class="btn btn-green btn-sm" style="margin-left:auto" onclick="event.stopPropagation();openCheckinForm('${c.id}','${myTalent?.name||currentUser}')">打卡</button>`:''}</div>
+          </div>`;
+        }).join('')||'<div class="empty"><span class="ei">📭</span><span class="et">暂无执行项目</span></div>'}
+      </div>
+    `;return;
+  }
+
+  if(currentRole==='assistant'){
+    const pendingCheckins=store.checkins.filter(ci=>!ci.confirmedBy);
+    const todayCheckins=store.checkins.filter(ci=>ci.date===new Date().toISOString().split('T')[0]);
+    mc.innerHTML=`
+      <div class="alert alert-info">💼 ${currentUser}，今日待处理 ${myTodos.length} 项任务</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="sv">${store.contracts.length}</div><div class="sl">全盘合同</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--r)">${pendingCheckins.length}</div><div class="sl">待确认打卡</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--b)">${todayCheckins.length}</div><div class="sl">今日打卡</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--r)">${urgTodos.length}</div><div class="sl">紧急待办</div></div>
+      </div>
+      <div class="section"><div class="section-title">快捷操作</div>
+        <div class="quick-actions">
+          <button class="qa-item" onclick="openNewContract()"><span class="qai">📝</span><span class="qan">新建合同</span></button>
+          <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">📋</span><span class="qan">合同列表</span></button>
+          <button class="qa-item" onclick="switchTab('todos')"><span class="qai">📌</span><span class="qan">待办(${myTodos.length})</span></button>
+          <button class="qa-item" onclick="switchTab('dashboard')"><span class="qai">📈</span><span class="qan">看板</span></button>
+          <button class="qa-item" onclick="openCheckinForm()"><span class="qai">✅</span><span class="qan">执行打卡</span></button>
+          <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">🔍</span><span class="qan">查合同</span></button>
+        </div>
+      </div>
+      ${pendingCheckins.length?`<div class="section"><div class="section-title">⏳ 待确认打卡 (${pendingCheckins.length}) <span class="more" onclick="switchTab('dashboard')">去确认→</span></div>${pendingCheckins.slice(0,5).map(ci=>`<div class="checkin-item" style="cursor:pointer" onclick="confirmCheckinQuick('${ci.id}')"><div><span class="ci-date">${ci.date}</span><span style="margin-left:6px">${ci.talentName} · ${ci.type}</span></div><span class="ci-gmv">GMV ¥${fmt(ci.gmv||0)}</span></div>`).join('')}</div>`:''}
+    `;return;
+  }
+
+  if(currentRole==='finance'){
+    const totalAmount=store.contracts.reduce((s,c)=>s+c.amount,0);
+    const totalPaid=store.contracts.reduce((s,c)=>s+(c.paidAmount||0),0);
+    const totalGMV=store.checkins.reduce((s,c)=>s+(c.gmv||0),0);
+    const dueSoon=store.contracts.filter(c=>{
+      const d=new Date(c.dueDate);const now=new Date();
+      return c.phase<7&&(d-now)/(86400000)<=30;
+    }).length;
+    const contractsWithPayments=store.contracts.filter(c=>c.payments&&c.payments.length);
+    const recentPayments=contractsWithPayments.flatMap(c=>(c.payments||[]).map(p=>({...p,brand:c.brandName,contract:c.contractName}))).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+    mc.innerHTML=`
+      <div class="alert alert-info">💰 财务工作台 · ${currentUser}</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="sv" style="color:var(--r)">¥${fmt(totalAmount)}</div><div class="sl">合同总金额</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--g)">¥${fmt(totalPaid)}</div><div class="sl">累计回款</div></div>
+        <div class="stat-card"><div class="sv" style="color:#FF9500">¥${fmt(totalAmount-totalPaid)}</div><div class="sl">待收金额</div></div>
+        <div class="stat-card"><div class="sv" style="color:${dueSoon>0?'var(--r)':'var(--b)'}">${dueSoon}</div><div class="sl">30天内到期</div></div>
+      </div>
+      <div class="section"><div class="section-title">快捷操作</div>
+        <div class="quick-actions">
+          <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">📋</span><span class="qan">全部合同</span></button>
+          <button class="qa-item" onclick="switchTab('todos')"><span class="qai">📌</span><span class="qan">待办(${myTodos.length})</span></button>
+          <button class="qa-item" onclick="switchTab('dashboard')"><span class="qai">📈</span><span class="qan">财务看板</span></button>
+          <button class="qa-item" onclick="exportData()"><span class="qai">📥</span><span class="qan">导出数据</span></button>
+        </div>
+      </div>
+      ${recentPayments.length?`
+      <div class="section"><div class="section-title">💳 近期回款记录</div>
+        ${recentPayments.map(p=>`<div class="payment-item" style="margin-bottom:4px"><div><strong>${p.brand}</strong> · ${p.contract}<br><span style="font-size:10px;color:var(--t2)">${p.date}${p.note?' · '+p.note:''}</span></div><span class="pay-amount">+¥${fmt(p.amount)}</span></div>`).join('')}
+      </div>`:''}
+    `;return;
+  }
+
+  if(currentRole==='flow_director'){
+    const totalAmount=store.contracts.reduce((s,c)=>s+c.amount,0);
+    const totalPaid=store.contracts.reduce((s,c)=>s+(c.paidAmount||0),0);
+    const totalGMV=store.checkins.reduce((s,c)=>s+(c.gmv||0),0);
+    const phaseStats=PHASES.map((p,i)=>({phase:p,count:store.contracts.filter(c=>c.phase===i).length}));
+    const overdue=store.contracts.filter(c=>c.phase<7&&new Date(c.dueDate)<new Date());
+    mc.innerHTML=`
+      <div class="alert" style="background:#F0F7FF;border-color:#1989FA40;color:#004085">🔍 全流程监控视角 · ${currentUser}</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="sv">${store.contracts.length}</div><div class="sl">总合同</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--r)">¥${fmt(totalAmount)}</div><div class="sl">合同总金额</div></div>
+        <div class="stat-card"><div class="sv" style="color:var(--g)">¥${fmt(totalPaid)}</div><div class="sl">已回款</div></div>
+        <div class="stat-card"><div class="sv" style="color:${overdue.length?'var(--r)':'var(--b)'}">${overdue.length}</div><div class="sl">超期未归档</div></div>
+      </div>
+      <div class="dash-chart"><h4>📊 8阶段合同分布</h4>
+        <div class="bar-chart">
+          ${phaseStats.map((s,i)=>{const maxN=Math.max(1,...phaseStats.map(p=>p.count));return`<div class="bar-row"><span class="bar-label" style="width:65px">${s.phase}</span><div class="bar-track"><div class="bar-fill" style="width:${s.count/maxN*100}%;background:var(--ph${i})"></div></div><span class="bar-count">${s.count}</span></div>`}).join('')}
+        </div>
+      </div>
+      <div class="section"><div class="section-title">快捷操作</div>
+        <div class="quick-actions">
+          <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">📋</span><span class="qan">全部合同</span></button>
+          <button class="qa-item" onclick="switchTab('todos')"><span class="qai">📌</span><span class="qan">待办监控</span></button>
+          <button class="qa-item" onclick="switchTab('dashboard')"><span class="qai">📈</span><span class="qan">数据看板</span></button>
+          <button class="qa-item" onclick="openAuditLog()"><span class="qai">📜</span><span class="qan">操作日志</span></button>
+          <button class="qa-item" onclick="exportData()"><span class="qai">📥</span><span class="qan">导出数据</span></button>
+          <button class="qa-item" onclick="startFeishuSync()"><span class="qai">☁️</span><span class="qan">同步飞书</span></button>
+          <button class="qa-item" onclick="loadFromCloud().then(ok=>ok?toast('✅ 已从 GitHub 加载'):toast('❌ 加载失败'));switchTab('home')"><span class="qai">⬇️</span><span class="qan">云端加载</span></button>
+        </div>
+      </div>
+    `;return;
+  }
+
+  // Default: director
+  const totalAmount=store.contracts.reduce((s,c)=>s+c.amount,0);
+  const activeContracts=store.contracts.filter(c=>c.phase<7).length;
+  const totalPaid=store.contracts.reduce((s,c)=>s+(c.paidAmount||0),0);
+  const recentCheckins=store.checkins.slice(-5).reverse();
+
+  mc.innerHTML=`
+    <div class="stats-row">
+      <div class="stat-card"><div class="sv">${activeContracts}</div><div class="sl">进行中合同</div></div>
+      <div class="stat-card"><div class="sv" style="color:var(--r)">¥${fmt(totalAmount)}</div><div class="sl">合同总金额</div></div>
+      <div class="stat-card"><div class="sv" style="color:var(--g)">¥${fmt(totalPaid)}</div><div class="sl">已回款金额</div></div>
+      <div class="stat-card"><div class="sv" style="color:var(--b)">${myTodos.length}</div><div class="sl">我的待办</div></div>
+    </div>
+    <div class="section"><div class="section-title">快捷操作</div>
+      <div class="quick-actions">
+        <button class="qa-item" onclick="openNewContract()"><span class="qai">📝</span><span class="qan">新建合同</span></button>
+        <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">📋</span><span class="qan">合同列表</span></button>
+        <button class="qa-item" onclick="switchTab('todos')"><span class="qai">📌</span><span class="qan">我的待办</span></button>
+        <button class="qa-item" onclick="switchTab('dashboard')"><span class="qai">📈</span><span class="qan">数据看板</span></button>
+        <button class="qa-item" onclick="openCheckinForm()"><span class="qai">✅</span><span class="qan">执行打卡</span></button>
+        <button class="qa-item" onclick="openTalentLib()"><span class="qai">⭐</span><span class="qan">达人库</span></button>
+        <button class="qa-item" onclick="openBrandLib()"><span class="qai">🏷</span><span class="qan">品牌库</span></button>
+        <button class="qa-item" onclick="openThirdPartyLib()"><span class="qai">🏢</span><span class="qan">第三方</span></button>
+        ${currentRole==='director'?`<button class="qa-item" onclick="openRecycleBin()"><span class="qai">🗑</span><span class="qan">回收站</span></button><button class="qa-item" onclick="openUserMgr()"><span class="qai">👥</span><span class="qan">用户管理</span></button><button class="qa-item" onclick="openAuditLog()"><span class="qai">📜</span><span class="qan">操作日志</span></button><button class="qa-item" onclick="importExcel()"><span class="qai">📊</span><span class="qan">导入Excel</span></button><button class="qa-item" onclick="startFeishuSync()"><span class="qai">☁️</span><span class="qan">同步飞书</span></button><button class="qa-item" onclick="loadFromCloud().then(ok=>{if(ok){switchTab('home');toast('✅ 已从云端加载')}else toast('❌ 加载失败')})"><span class="qai">⬇️</span><span class="qan">云端加载</span></button>`:''}
+        <button class="qa-item" onclick="switchTab('contracts')"><span class="qai">🔍</span><span class="qan">查合同</span></button>
+      </div>
+    </div>
+    <div class="section"><div class="section-title">最近执行动态 <span class="more" onclick="switchTab('contracts')">全部→</span></div>
+      ${recentCheckins.length?recentCheckins.map(c=>`<div class="ct-card" style="border-left-color:var(--g);margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:center"><span><strong>${c.talentName}</strong> · ${c.type}</span><span style="font-size:11px;color:var(--t2)">${c.date}</span></div><div style="font-size:11px;color:var(--t2);margin-top:2px">观看${fmt(c.viewers)} · GMV ¥${fmt(c.gmv||0)}</div></div>`).join(''):'<div class="empty"><span class="ei">📭</span><span class="et">暂无执行记录</span></div>'}
+    </div>
+  `;
+}
+
+// Quick confirm from home
+function confirmCheckinQuick(id){
+  const ci=store.checkins.find(x=>x.id===id);
+  if(!ci)return;
+  ci.confirmedBy=currentUser;
+  saveStore(store);
+  renderTab('home');
+  toast(`已确认 ${ci.talentName} 打卡`);
+}
+
+// === Contracts ===
+function renderContracts(mc){
+  let list=[...store.contracts];
+  // Default role-based filtering
+  if(currentRole==='talent'){
+    list=list.filter(c=>c.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)||t.name.includes(currentUser)));
+  }
+  // Sort by updatedAt desc
+  list.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+
+  mc.innerHTML=`
+    <div class="section">
+      <div class="section-title">合同列表 <span style="font-weight:400;color:var(--t2)">(${list.length})</span>
+        ${currentRole==='director'||currentRole==='assistant'?`<button class="btn btn-green btn-sm" onclick="openNewContract()">+ 新建</button>`:''}
+      </div>
+    </div>
+    <div class="filters">
+      <button class="filter-chip on" onclick="filterContracts(this,'all')">全部</button>
+      <button class="filter-chip" onclick="filterContracts(this,'active')">进行中</button>
+      <button class="filter-chip" onclick="filterContracts(this,'done')">已归档</button>
+      <button class="filter-chip" onclick="filterContracts(this,'mine')">我的</button>
+    </div>
+    <div class="ct-list" id="contractList">
+      ${list.map(c=>renderContractCard(c)).join('')}
+    </div>
+  `;
+}
+
+function renderContractCard(c){
+  const totalFee=c.talents.reduce((s,t)=>s+(t.fee||0),0);
+  // Risk calculation
+  const now=new Date();
+  const due=new Date(c.dueDate);
+  const daysLeft=Math.ceil((due-now)/(86400000));
+  let risk='n',riskLabel='正常';
+  if(c.phase>=7){risk='n';riskLabel='已归档'}
+  else if(daysLeft<=0){risk='r';riskLabel='超期'}
+  else if(daysLeft<=14){risk='y';riskLabel='临近到期'}
+  else if(daysLeft<=30){risk='n';riskLabel='正常'}
+  return `
+  <div class="ct-card ${PHASE_COLORS[c.phase]} risk-${risk}" onclick="openContractDetail('${c.id}')">
+    <div class="ct-top">
+      <div>
+        <div class="ct-brand">${c.brandName}<span class="ct-risk ${risk}">${riskLabel}</span></div>
+        <div style="font-size:11px;color:var(--t2)">${c.contractName}</div>
+      </div>
+      <div class="ct-money">¥${fmt(c.amount)}</div>
+    </div>
+    <div class="ct-mid">
+      <span>${c.signDate} ~ ${c.dueDate}</span>
+      <span>${c.talents.length}位达人</span>
+      ${totalFee?`<span>达人费 ¥${fmt(totalFee)}</span>`:''}
+      ${c.paidAmount?`<span style="color:var(--g)">已回¥${fmt(c.paidAmount)}</span>`:''}
+    </div>
+    <div class="ct-bot">
+      ${phaseTag(c.phase)}
+      <span class="ct-action">${ACTIONS[c.nextAction]||''} →</span>
+    </div>
+  </div>`;
+}
+
+function filterContracts(btn,type){
+  btn.parentElement.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  let list=[...store.contracts];
+  list.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+  if(type==='active')list=list.filter(c=>c.phase<7);
+  else if(type==='done')list=list.filter(c=>c.phase===7);
+  else if(type==='mine'){
+    if(currentRole==='director'||currentRole==='flow_director')list=list.filter(c=>c.nextAction<=2);
+    else if(currentRole==='assistant')list=list.filter(c=>c.phase>=2&&c.phase<=4);
+    else if(currentRole==='talent')list=list.filter(c=>c.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)||t.name.includes(currentUser)));
+    else if(currentRole==='finance')list=list;
+  } else if(type==='all'){
+    // "全部" also respects role: talent only sees their own
+    if(currentRole==='talent')list=list.filter(c=>c.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)||t.name.includes(currentUser)));
+  }
+  document.getElementById('contractList').innerHTML=list.map(c=>renderContractCard(c)).join('')||'<div class="empty"><span class="ei">📭</span><span class="et">没有匹配的合同</span></div>';
+}
+
+// === New Contract ===
+function openNewContract(contractId){
+  let c=null;
+  if(contractId){
+    c=store.contracts.find(x=>x.id===contractId);
+    if(!c)return;
+    // Admin can edit any contract; assistants only phase 0
+    if(currentRole!=='director'&&c.phase>0){toast('只能编辑启动阶段的合同');return}
+  }
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd">
+    <h3>${c?'编辑合同':'新建合同'}</h3>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="modal-bd">
+    <div class="form-grid">
+      <div class="form-item"><label class="form-label"><span class="req">*</span>品牌方</label>
+        <select class="form-select brand">${store.brands.map(b=>`<option value="${b.name}" ${c?.brandName===b.name?'selected':''}>${b.name}${b.parent?` (${b.parent})`:''} · ${b.type}</option>`).join('')}</select>
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>合同名称</label>
+        <input class="form-input cname" value="${c?.contractName||''}">
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>合同金额</label>
+        <input class="form-input amount" type="number" value="${c?.amount||''}" min="0">
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>签约日期</label>
+        <input class="form-input signDate" type="date" value="${c?.signDate||''}">
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>到期日期</label>
+        <input class="form-input dueDate" type="date" value="${c?.dueDate||''}">
+      </div>
+      <div class="form-item"><label class="form-label">合同附件</label>
+        <input class="form-input attachment" placeholder="飞书文档链接" value="${c?.attachment||''}">
+      </div>
+      <div class="form-item"><label class="form-label">第三方返利</label>
+        <input class="form-input tpRebate" value="${c?.thirdPartyRebate||''}" placeholder="如：返利30%给拓扑传媒">
+      </div>
+      <div class="form-item"><label class="form-label">公司达人分配</label>
+        <input class="form-input splitPlan" value="${c?.splitPlan||''}" placeholder="如：公司70% 达人30%">
+      </div>
+      <div class="form-item"><label class="form-label">平台返利/扣点</label>
+        <input class="form-input platformRebate" value="${c?.platformRebate||''}" placeholder="如：抖音扣点2%">
+      </div>
+    </div>
+    <div class="section-title" style="margin-top:14px">达人分配（可多个达人）</div>
+    <div class="talent-rows" id="talentRows">
+      ${(c?.talents||[{name:'',fee:'',startDate:'',endDate:'',rebateRate:'',thirdParty:'',remark:''}]).map((t,i)=>renderTalentRow(t,i)).join('')}
+    </div>
+    <button class="add-talent-btn" onclick="addTalentRow()">+ 添加达人</button>
+    <input type="hidden" class="contractId" value="${c?.id||''}">
+  </div>
+  <div class="modal-ft">
+    <button class="btn btn-white" onclick="closeModal()">取消</button>
+    <button class="btn btn-green" onclick="saveContract()">保存</button>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function renderTalentRow(t,i){
+  return `
+  <div class="talent-row">
+    <div class="talent-row-hd"><span>达人 #${i+1}</span>
+      ${i>0?`<button class="del-talent" onclick="this.closest('.talent-row').remove()">−</button>`:''}
+    </div>
+    <div class="talent-row-grid">
+      <div><div class="talent-label">达人姓名/昵称</div><select class="talent-input t-name" onchange="if(this.value==='__custom__'){const v=prompt('输入达人姓名：');if(v){const o=document.createElement('option');o.value=v;o.text=v;o.selected=true;this.add(o,0)}}">${['<option value="">—选择达人—</option>',...store.talents.map(tl=>`<option value="${tl.name}" ${t.name===tl.name?'selected':''}>${tl.name} (${tl.platform}·${tl.fans})</option>`),'<option value="__custom__">其他（手动输入）</option>'].join('')}</select></div>
+      <div><div class="talent-label">费用 ¥</div><input class="talent-input t-fee" type="number" value="${t.fee||''}" min="0"></div>
+      <div><div class="talent-label">返利比例</div><input class="talent-input t-rebate" value="${t.rebateRate||''}" placeholder="如10%"></div>
+      <div><div class="talent-label">开始日期</div><input class="talent-input t-start" type="date" value="${t.startDate||''}"></div>
+      <div><div class="talent-label">结束日期</div><input class="talent-input t-end" type="date" value="${t.endDate||''}"></div>
+      <div><div class="talent-label">第三方机构</div><input class="talent-input t-third" value="${t.thirdParty||''}"></div>
+      <div class="tr-full"><div class="talent-label">备注</div><textarea class="talent-input t-remark" rows="2">${t.remark||''}</textarea></div>
+    </div>
+  </div>`;
+}
+
+function addTalentRow(){
+  const container=document.getElementById('talentRows');
+  const idx=container.children.length;
+  container.insertAdjacentHTML('beforeend',renderTalentRow({name:'',fee:'',startDate:'',endDate:'',rebateRate:'',thirdParty:'',remark:''},idx));
+}
+
+function saveContract(){
+  const m=document.getElementById('modalBox');
+  const get=(s)=>m.querySelector(s)?.value||'';
+  const brand=get('.brand');const cname=get('.cname');const amount=parseFloat(get('.amount'))||0;
+  const signDate=get('.signDate');const dueDate=get('.dueDate');
+  const attachment=get('.attachment');
+  const thirdPartyRebate=get('.tpRebate');
+  const splitPlan=get('.splitPlan');
+  const platformRebate=get('.platformRebate');
+  const contractId=get('.contractId');
+  if(!brand||!cname||!amount||!signDate||!dueDate){toast('请填写必填字段');return}
+
+  const talents=[];
+  m.querySelectorAll('.talent-row').forEach(row=>{
+    const n=row.querySelector('.t-name')?.value||'';
+    if(n&&n!=='__custom__')talents.push({
+      name:n,
+      fee:parseFloat(row.querySelector('.t-fee')?.value)||0,
+      rebateRate:row.querySelector('.t-rebate')?.value||'',
+      startDate:row.querySelector('.t-start')?.value||'',
+      endDate:row.querySelector('.t-end')?.value||'',
+      thirdParty:row.querySelector('.t-third')?.value||'',
+      remark:row.querySelector('.t-remark')?.value||''
+    });
+  });
+
+  if(contractId){
+    const idx=store.contracts.findIndex(c=>c.id===contractId);
+    if(idx>=0){
+      store.contracts[idx].brandName=brand;store.contracts[idx].contractName=cname;
+      store.contracts[idx].amount=amount;store.contracts[idx].signDate=signDate;
+      store.contracts[idx].dueDate=dueDate;store.contracts[idx].attachment=attachment;
+      store.contracts[idx].thirdPartyRebate=thirdPartyRebate;store.contracts[idx].splitPlan=splitPlan;
+      store.contracts[idx].platformRebate=platformRebate;store.contracts[idx].talents=talents;
+      store.contracts[idx].updatedAt=new Date().toISOString().split('T')[0];
+      addAuditLog('编辑合同',brand+' '+cname,`金额:${amount} 达人:${talents.map(t=>t.name).join(',')}`);
+    }
+  }else{
+    const nc={
+      id:genId('C'),brandName:brand,contractName:cname,amount,signDate,dueDate,
+      attachment,thirdPartyRebate,splitPlan,platformRebate,
+      phase:0,nextAction:0,talents,createdAt:new Date().toISOString().split('T')[0],
+      updatedAt:new Date().toISOString().split('T')[0]
+    };
+    store.contracts.push(nc);
+    addAuditLog('创建合同',brand+' '+cname,`金额:${amount} 达人:${talents.map(t=>t.name).join(',')}`);
+  }
+  saveStore(store);
+  closeModal();
+  renderTab(currentTab);
+  toast(contractId?'合同已更新':'合同已创建');
+}
+
+// === Contract Detail ===
+function openContractDetail(id){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c)return;
+  // Talent can only view their own contracts
+  if(currentRole==='talent' && !c.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)||t.name.includes(currentUser))){
+    toast('无权限查看此合同');
+    return;
+  }
+  const totalFee=c.talents.reduce((s,t)=>s+(t.fee||0),0);
+  const checkins=getContractCheckins(c.id).slice(-10).reverse();
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd">
+    <h3>${c.brandName} · ${c.contractName}</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      ${currentRole==='director'?`
+        <button class="btn btn-blue btn-sm" onclick="closeModal();openNewContract('${c.id}')">✏️ 编辑</button>
+        <button class="btn btn-red btn-sm" onclick="deleteContract('${c.id}')">🗑 删除</button>
+      `:''}
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+  </div>
+  <div class="modal-bd">
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">合同金额</div><div class="detail-value money">¥${fmt(c.amount)}</div></div>
+      <div class="detail-item"><div class="detail-label">达人费用合计</div><div class="detail-value money">¥${fmt(totalFee)}</div></div>
+      <div class="detail-item"><div class="detail-label">签约日期</div><div class="detail-value">${c.signDate}</div></div>
+      <div class="detail-item"><div class="detail-label">到期日期</div><div class="detail-value">${c.dueDate}</div></div>
+      ${c.paidAmount?`<div class="detail-item"><div class="detail-label">已回款</div><div class="detail-value" style="color:var(--g)">¥${fmt(c.paidAmount)}</div></div>`:''}
+      ${c.paybackDate?`<div class="detail-item"><div class="detail-label">回款日期</div><div class="detail-value">${c.paybackDate}</div></div>`:''}
+      ${c.thirdPartyRebate?`<div class="detail-item"><div class="detail-label">第三方返利</div><div class="detail-value">${c.thirdPartyRebate}</div></div>`:''}
+      ${c.splitPlan?`<div class="detail-item"><div class="detail-label">公司与达人分配</div><div class="detail-value">${c.splitPlan}</div></div>`:''}
+      ${c.platformRebate?`<div class="detail-item"><div class="detail-label">平台返利/扣点</div><div class="detail-value">${c.platformRebate}</div></div>`:''}
+      ${c.attachment?`<div class="detail-item"><div class="detail-label">合同附件</div><div class="detail-value" style="font-size:11px">${c.attachment}</div></div>`:''}
+    </div>
+
+    <div class="section-title">📋 流程确认</div>
+    <div class="phase-stepper">
+      ${PHASES.map((p,i)=>{
+        let cls='';
+        const key='phase'+i;
+        const confirmer=c.phaseConfirmers?.[key];
+        if(i<c.phase)cls='done';
+        else if(i===c.phase)cls='active';
+        return `<span class="ph-step ${cls}" title="${confirmer?'已确认：'+confirmer:'未确认'}">${i+1}.${p}${confirmer?' ✓':''}</span>`;
+      }).join(' → ')}
+    </div>
+    <div style="margin:8px 0;font-size:11px;color:var(--t2)">下一步：<strong style="color:var(--b)">${ACTIONS[c.nextAction]||'归档完成'}</strong></div>
+
+    ${(()=>{
+      if(c.phase>=7)return '<div style="text-align:center;color:var(--g);font-weight:600;padding:8px">✅ 合同已归档</div>';
+      // Check if current user has already confirmed this phase
+      const phaseKey='phase'+c.phase;
+      const roleKey=currentRole+'_'+currentUser;
+      const alreadyConfirmed=c.phaseConfirmers?.[phaseKey]===roleKey;
+      if(alreadyConfirmed){
+        return `<div class="alert" style="background:#F0FDF8;border:1px solid var(--g);text-align:center;font-size:12px;padding:10px;border-radius:8px;margin-bottom:12px">
+          ✅ 你已确认「${PHASES[c.phase]}」阶段<br><span style="color:var(--t2);font-size:10px">等待下一个角色操作</span>
+        </div>`;
+      }
+      // Role-based advance permission: 总监→0-4步, 财务→5-7步
+      const phaseRoles={0:['director'],1:['director'],2:['director','assistant'],3:['director','assistant'],4:['director'],5:['finance'],6:['finance'],7:['finance']};
+      const canAdv=(phaseRoles[c.phase]||[]).includes(currentRole);
+      // flow_director: view only, never show advance button
+      if(currentRole==='flow_director'){
+        return `<div class="alert" style="background:#F0F4FF;border:1px solid var(--b);text-align:center;font-size:12px;padding:10px;border-radius:8px;margin-bottom:12px">
+          👁️ 流程监控模式 - 当前阶段「${PHASES[c.phase]}」<br><span style="color:var(--t2);font-size:10px">流程总监可查看全部但不可操作</span>
+        </div>`;
+      }
+      if(c.phase<7&&canAdv){
+        const labels={0:'▶ 提交总监审核',1:'▶ 开始达人分配',2:'▶ 达人开始执行',3:'▶ 助理汇总',4:'▶ 进入财务结算',5:'▶ 开始回款跟进',6:'▶ 归档'};
+        return `<button class="btn btn-blue btn-block" onclick="advancePhase('${c.id}')" style="margin-bottom:12px">${labels[c.phase]||'▶ 推进下一阶段'}</button>`;
+      }
+      return `<div class="alert" style="background:#FFF9E6;border:1px solid #FFB020;text-align:center;font-size:12px;padding:10px;border-radius:8px;margin-bottom:12px">
+        ⏳ 当前阶段「${PHASES[c.phase]}」需由${phaseRoles[c.phase]?.join('/')||'管理员'}确认<br><span style="color:var(--t2);font-size:10px">你的角色（${currentRole}）无权操作此阶段</span>
+      </div>`;
+    })()}
+
+    ${(()=>{
+      if(c.phase>=1&&(currentRole==='director'||currentRole==='finance')){
+        return `<div class="section-title">💰 回款管理</div>
+    <div class="form-grid">
+      <div class="form-item"><label class="form-label">回款金额</label>
+        <input class="form-input" type="number" id="editPayAmount" value="" min="0" placeholder="本次回款金额">
+      </div>
+      <div class="form-item"><label class="form-label">回款日期</label>
+        <input class="form-input" type="date" id="editPayDate" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:flex-end">
+      <div class="form-item" style="flex:1"><label class="form-label">预期回款日期</label>
+        <input class="form-input" type="date" id="editExpectedPayDate" value="${c.expectedPayDate||''}">
+      </div>
+      <button class="btn btn-blue btn-sm" onclick="saveExpectedPayDate('${c.id}')" style="flex-shrink:0">保存</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <input class="form-input" id="editPayNote" placeholder="备注（可选）" style="flex:1">
+      <button class="btn btn-green btn-sm" onclick="addPayment('${c.id}')" style="flex-shrink:0">+ 记录回款</button>
+    </div>
+    ${(c.payments&&c.payments.length)?`
+    <div class="payment-list" style="margin-top:10px">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:4px">回款记录：</div>
+      ${c.payments.map((p,i)=>`<div class="payment-item"><div><span>${p.date}</span>${p.note?`<span style="color:var(--t2);margin-left:6px;font-size:10px">${p.note}</span>`:''}</div><div style="display:flex;gap:8px"><span class="pay-amount">+¥${fmt(p.amount)}</span><button class="btn btn-red btn-sm" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();delPayment('${c.id}',${i})">×</button></div></div>`).join('')}
+      <div class="payment-total"><span>累计回款</span><span style="color:var(--g)">¥${fmt(c.payments.reduce((s,p)=>s+p.amount,0))}</span></div>
+      <div class="payment-total" style="border-top-style:dashed"><span>待回款</span><span style="color:var(--r)">¥${fmt(c.amount-c.payments.reduce((s,p)=>s+p.amount,0))}</span></div>
+    </div>`:''}`;
+      }
+      return '';
+    })()}
+
+    ${(()=>{
+      // Extra notes (增项备注)
+      return `<div class="section-title">📝 增项备注 ${(currentRole==='director'||currentRole==='assistant')?`<button class="btn btn-green btn-sm" onclick="addExtraNote('${c.id}')">+ 添加</button>`:''}</div>
+      ${(c.extraNotes&&c.extraNotes.length)?c.extraNotes.map((n,i)=>`<div class="payment-item" style="border-left-color:var(--b)"><div><span style="color:var(--t2);font-size:10px">${n.date}</span> <span style="font-weight:600">${n.author}</span><br>${n.text}</div>${(currentRole==='director'||(currentRole==='assistant'&&n.author===currentUser))?`<button class="btn btn-red btn-sm" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();delExtraNote('${c.id}',${i})">×</button>`:''}</div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:8px 0">暂无增项备注</div>'}`;
+    })()}
+
+    <div class="section-title">达人分配 (${c.talents.length}位)</div>
+    ${c.talents.map(t=>{
+      const tCheckins=getTalentCheckins(t.name,c.id);
+      return `
+      <div class="talent-block">
+        <div class="tb-hd">
+          <span class="tb-name">${t.name}</span>
+          <span class="tb-fee">¥${fmt(t.fee)}</span>
+        </div>
+        <div class="tb-row">
+          <span>📅 ${t.startDate}~${t.endDate}</span>
+          ${t.rebateRate?`<span>💰 返利${t.rebateRate}</span>`:''}
+          ${t.thirdParty?`<span>🏢 ${t.thirdParty}</span>`:''}
+        </div>
+        ${t.remark?`<div style="font-size:11px;color:var(--t2);margin-top:4px">备注：${t.remark}</div>`:''}
+        <div style="font-size:11px;color:var(--g);margin-top:4px">打卡 ${tCheckins.length} 次 · 累计GMV ¥${fmt(tCheckins.reduce((s,ci)=>s+(ci.gmv||0),0))}</div>
+        ${c.phase===3&&(currentRole==='director'||currentRole==='assistant')?`<button class="btn btn-green btn-sm" style="margin-top:6px" onclick="openCheckinForm('${c.id}','${t.name}')">+ 执行打卡</button>`:''}
+      </div>`;
+    }).join('')}
+
+    ${checkins.length?`
+    <div class="section-title">最近执行记录</div>
+    <div class="checkin-list">
+      ${checkins.map(ci=>`
+        <div class="checkin-item">
+          <div>
+            <span class="ci-date">${ci.date}</span>
+            <span style="margin-left:6px">${ci.talentName} · ${ci.type} · ${ci.liveHours}h</span>
+            ${ci.editDone?`<span style="color:var(--g);margin-left:6px">✂️剪辑完成</span>`:`<span style="color:#FF9500;margin-left:6px">✂️剪辑中</span>`}
+            ${ci.confirmedBy?`<span style="color:var(--g);margin-left:6px">✓${ci.confirmedBy}已确认</span>`:''}
+          </div>
+          <span class="ci-gmv">GMV ¥${fmt(ci.gmv||0)}</span>
+        </div>
+      `).join('')}
+    </div>
+    `:''}
+
+    ${(()=>{
+      // Contract photos
+      return `<div class="section-title">📷 合同照片 ${(currentRole==='director'||currentRole==='assistant')?`<label class="btn btn-green btn-sm" style="cursor:pointer;font-size:10px;padding:4px 10px"><input type="file" accept="image/*" style="display:none" onchange="uploadContractPhoto(this,'${c.id}')">+ 上传</label>`:''}</div>
+      ${(c.photos&&c.photos.length)?`<div style="display:flex;flex-wrap:wrap;gap:6px">${c.photos.map((p,i)=>`<div style="position:relative;flex-shrink:0">
+        <img src="${p.data}" class="img-thumb" style="width:80px;height:60px;object-fit:cover" onclick="showFullImage(\`${p.data}\`)">
+        <div style="font-size:9px;color:var(--t2);text-align:center">${p.date}</div>
+        ${(currentRole==='director'||(currentRole==='assistant'&&p.uploadedBy===currentUser))?`<button class="btn btn-red" style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;font-size:10px;padding:0;line-height:16px" onclick="event.stopPropagation();delContractPhoto('${c.id}',${i})">×</button>`:''}
+      </div>`).join('')}</div>`:'<div style="font-size:11px;color:var(--t3);padding:8px 0">暂无合同照片</div>'}`;
+    })()}
+
+    ${(()=>{
+      return `<div class="section-title">📄 合同文本</div>
+      <button class="btn btn-blue btn-sm" onclick="generateContractText('${c.id}')">自动生成合同文本</button>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">根据合同数据自动填空生成标准合同模板，可复制使用</div>`;
+    })()}
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function advancePhase(id){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c)return;
+
+  // flow_director: view only
+  if(currentRole==='flow_director'){toast('流程总监仅可查看，不可操作');return;}
+
+  // Check if talent has checked in before phase 3→4
+  if(c.phase===3){
+    const talentCheckins=store.checkins.filter(ci=>ci.contractId===id);
+    if(!talentCheckins.length){toast('❌ 达人尚未打卡，请先完成打卡再推进');return}
+    // Check if all assigned talents have checked in
+    const assigned=(c.talents||[]).map(t=>t.name);
+    const done=assigned.filter(n=>talentCheckins.some(ci=>ci.talentName===n));
+    if(done.length<assigned.length){
+      const missing=assigned.filter(n=>!done.includes(n)).join('、');
+      toast(`❌ 以下达人尚未打卡：${missing}`);
+      return;
+    }
+  }
+
+  // Rule: all assigned talents must have checked in before archiving (phase 6→7)
+  if(c.phase===6){
+    const assigned=(c.talents||[]).map(t=>t.name);
+    const chk=store.checkins.filter(ci=>ci.contractId===id);
+    const done=assigned.filter(n=>chk.some(ci=>ci.talentName===n));
+    if(assigned.length&&done.length<assigned.length){
+      const missing=assigned.filter(n=>!done.includes(n)).join('、');
+      toast(`❌ 达人必须打卡才能归档！以下达人尚未打卡：${missing}`);
+      return;
+    }
+  }
+
+  // Check full payment before archiving (phase 6→7)
+  if(c.phase===6){
+    const paid=c.paidAmount||0;
+    const total=c.amount||0;
+    if(paid<total){
+      const remaining=total-paid;
+      toast(`❌ 合同尚未全额回款！已回¥${fmt(paid)} / 总额¥${fmt(total)}，还差¥${fmt(remaining)}`);
+      return;
+    }
+  }
+
+  // Check if current role already confirmed this phase
+  if(!c.phaseConfirmers)c.phaseConfirmers={};
+  const phaseKey='phase'+c.phase;
+  const roleKey=currentRole+'_'+currentUser;
+  if(c.phaseConfirmers[phaseKey]===roleKey){
+    toast('⚠️ 你已确认过此阶段，请等待下一个角色确认');
+    return;
+  }
+  c.phaseConfirmers[phaseKey]=roleKey;
+
+  c.phase=Math.min(c.phase+1,7);
+  c.nextAction=Math.min(c.nextAction+1,7);
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(id);
+  addAuditLog('推进阶段',c.brandName+' '+c.contractName,`→${PHASES[c.phase]}`);
+  toast(`✅ 已确认推进到：${PHASES[c.phase]}`);
+}
+
+function generateContractText(contractId){
+  const c=store.contracts.find(x=>x.id===contractId);
+  if(!c)return;
+  const totalFee=c.talents.reduce((s,t)=>s+(t.fee||0),0);
+  const talentText=c.talents.map(t=>`  ${t.name}，合作费用 ¥${fmt(t.fee)}，执行期限 ${t.startDate} 至 ${t.endDate}${t.remark?'，'+t.remark:''}${t.thirdParty?'，第三方：'+t.thirdParty:''}${t.rebateRate?'，返利：'+t.rebateRate:''}`).join('；\n');
+  const text=`=========== 商务合作合同（模板）===========
+
+甲方（品牌方）：${c.brandName}
+乙方（执行方）：微谷云商务
+
+一、合作内容
+${c.contractName}
+
+二、合同金额
+合同总金额：¥${fmt(c.amount)}（人民币）
+达人合作费用合计：¥${fmt(totalFee)}
+
+三、合作达人
+${talentText}
+
+四、合作期限
+${c.signDate} 至 ${c.dueDate}
+${c.remark?`备注：${c.remark}`:''}
+
+五、费用条款
+${c.thirdPartyRebate?`第三方返利：${c.thirdPartyRebate}`:''}
+${c.splitPlan?`公司达人分配：${c.splitPlan}`:''}
+${c.platformRebate?`平台扣点：${c.platformRebate}`:''}
+${c.paidAmount?`已预付金额：¥${fmt(c.paidAmount)}`:'待支付'}
+
+六、付款方式
+按月度执行，品牌方验收后支付当月费用。
+
+七、其他
+本合同一式两份，甲乙双方各执一份，自签署之日起生效。
+
+============================================`;
+
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>📄 合同文本 · ${c.brandName}</h3>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-green btn-sm" onclick="copyContractText()">📋 复制文本</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+  </div>
+  <div class="modal-bd">
+    <pre id="contractTextArea" style="white-space:pre-wrap;font-size:12px;line-height:1.8;background:#f8f9fa;padding:16px;border-radius:var(--rds2);font-family:'PingFang SC','Microsoft YaHei',sans-serif">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+    <div style="font-size:10px;color:var(--t3);margin-top:4px">合同文本已根据数据自动填空，可直接复制粘贴到飞书文档或Word中使用</div>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function copyContractText(){
+  const text=document.getElementById('contractTextArea').textContent;
+  navigator.clipboard.writeText(text).then(()=>{toast('已复制到剪贴板')}).catch(()=>{toast('复制失败，请手动选择文本')});
+}
+
+function deleteContract(id){
+  if(!confirm('确定删除该合同？可在回收站恢复！'))return;
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c)return;
+  moveToTrash('contract',JSON.parse(JSON.stringify(c)));
+  store.contracts=store.contracts.filter(c=>c.id!==id);
+  store.checkins=store.checkins.filter(c=>c.contractId!==id);
+  saveStore(store);
+  closeModal();
+  renderTab(currentTab);
+  addAuditLog('删除合同',c.brandName+' '+c.contractName,'已移至回收站');
+  toast('合同已移至回收站（可恢复）');
+}
+
+// === Talent Library ===
+function openTalentLib(){
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>⭐ 达人库管理 (${store.talents.length}位)</h3>
+    <div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="addTalentLib()">+ 添加达人</button><button class="modal-close" onclick="closeModal()">✕</button></div>
+  </div>
+  <div class="modal-bd">
+    <table class="mini-table"><tr><th>姓名</th><th>平台</th><th>粉丝</th><th>领域</th><th>合作</th><th>备注</th><th>操作</th></tr>
+    ${store.talents.map(t=>`<tr id="trow_${t.id}">
+      <td style="font-weight:700">${t.name}</td><td>${t.platform}</td><td>${t.fans}</td><td>${t.category}</td><td>${t.cooperation}次</td>
+      <td style="font-size:10px;max-width:100px">${t.remark||''}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-blue btn-sm" onclick="editTalentLib('${t.id}')">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="delTalentLib('${t.id}')">🗑</button>
+      </td>
+    </tr>`).join('')}
+    </table>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function addTalentLib(){
+  const name=prompt('达人姓名/昵称：');if(!name)return;
+  const platform=prompt('平台（如抖音/快手/小红书）：','抖音');if(!platform)return;
+  const fans=prompt('粉丝数：','');const category=prompt('擅长领域：','');
+  const remark=prompt('备注：','');
+  store.talents.push({id:'T'+String(store.talents.length+1).padStart(3,'0'),name,platform,fans,category,cooperation:0,remark});
+  saveStore(store);
+  openTalentLib();
+}
+function delTalentLib(id){
+  if(!confirm('确定删除该达人？可在回收站恢复！'))return;
+  const t=store.talents.find(x=>x.id===id);
+  if(t)moveToTrash('talent',JSON.parse(JSON.stringify(t)));
+  store.talents=store.talents.filter(t=>t.id!==id);
+  saveStore(store);
+  openTalentLib();
+  toast('达人已移至回收站');
+}
+function editTalentLib(id){
+  const t=store.talents.find(x=>x.id===id);
+  if(!t)return;
+  // Inline edit: replace table row with inputs
+  const row=document.getElementById('trow_'+id);
+  if(!row)return;
+  row.innerHTML=`
+    <td><input class="talent-input" id="et_name" value="${t.name}" style="width:80px"></td>
+    <td><input class="talent-input" id="et_platform" value="${t.platform}" style="width:70px"></td>
+    <td><input class="talent-input" id="et_fans" value="${t.fans}" style="width:80px"></td>
+    <td><input class="talent-input" id="et_category" value="${t.category}" style="width:80px"></td>
+    <td><input class="talent-input" id="et_coop" type="number" value="${t.cooperation}" style="width:50px" min="0"></td>
+    <td><input class="talent-input" id="et_remark" value="${t.remark||''}" style="width:100px"></td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-green btn-sm" onclick="saveTalentLib('${id}')">💾</button>
+      <button class="btn btn-white btn-sm" onclick="openTalentLib()">✕</button>
+    </td>`;
+}
+function saveTalentLib(id){
+  const t=store.talents.find(x=>x.id===id);
+  if(!t)return;
+  t.name=document.getElementById('et_name').value||t.name;
+  t.platform=document.getElementById('et_platform').value||t.platform;
+  t.fans=document.getElementById('et_fans').value||t.fans;
+  t.category=document.getElementById('et_category').value||t.category;
+  t.cooperation=parseInt(document.getElementById('et_coop').value)||0;
+  t.remark=document.getElementById('et_remark').value||'';
+  saveStore(store);
+  openTalentLib();
+  toast('达人信息已保存');
+}
+
+// === Brand Library ===
+function openBrandLib(){
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>🏷 品牌库管理 (${store.brands.length}个)</h3>
+    <div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="addBrandLib()">+ 添加品牌</button><button class="modal-close" onclick="closeModal()">✕</button></div>
+  </div>
+  <div class="modal-bd">
+    <table class="mini-table"><tr><th>品牌</th><th>类型</th><th>父品牌</th><th>备注</th><th></th></tr>
+    ${store.brands.map(b=>`<tr>
+      <td style="font-weight:700">${b.name}</td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600;color:#fff;background:${b.type==='主品牌'?'var(--b)':b.type==='子品牌'?'var(--g)':'var(--ph5)'}">${b.type}</span></td>
+      <td>${b.parent||'—'}</td>
+      <td style="font-size:10px;max-width:120px">${b.remark||''}</td>
+      <td><button class="btn btn-red btn-sm" onclick="event.stopPropagation();delBrandLib('${b.id}')">删</button></td>
+    </tr>`).join('')}
+    </table>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function addBrandLib(){
+  const name=prompt('品牌名称：');if(!name)return;
+  const type=prompt('品牌类型（主品牌/子品牌/单一品牌）：','单一品牌');if(!type)return;
+  const parent=(type==='子品牌')?prompt('父品牌名称：',''):'';
+  const remark=prompt('备注：','');
+  store.brands.push({id:'B'+String(store.brands.length+1).padStart(3,'0'),name,type,parent,contact:'',remark});
+  saveStore(store);
+  openBrandLib();
+}
+function delBrandLib(id){
+  if(!confirm('确定删除该品牌？可在回收站恢复！'))return;
+  const b=store.brands.find(x=>x.id===id);
+  if(b)moveToTrash('brand',JSON.parse(JSON.stringify(b)));
+  store.brands=store.brands.filter(b=>b.id!==id);
+  saveStore(store);
+  openBrandLib();
+  toast('品牌已移至回收站');
+}
+
+// === Third Party Management ===
+function openThirdPartyLib(){
+  if(!store.thirdParties)store.thirdParties=[];
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>🏢 合作第三方管理 (${store.thirdParties.length}家)</h3>
+    <div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="addThirdParty()">+ 添加</button><button class="modal-close" onclick="closeModal()">✕</button></div>
+  </div>
+  <div class="modal-bd">
+    ${store.thirdParties.length?store.thirdParties.map((tp,i)=>`<div style="background:#f8f9fa;border-radius:var(--rds2);padding:12px;margin-bottom:8px;display:flex;gap:10px">
+      <div style="flex-shrink:0">${tp.licenseImg?`<img src="${tp.licenseImg}" class="img-thumb" style="width:80px;height:60px;object-fit:cover;cursor:pointer" onclick="showFullImage(\`${tp.licenseImg}\`)">`:''}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700">${tp.name||'未命名'}</div>
+        <div style="font-size:11px;color:var(--t2)">联系人: ${tp.contact||'—'} · ${tp.phone||'—'}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px">资质: ${tp.qualification||'未填写'}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+        <button class="btn btn-blue btn-sm" onclick="editThirdParty(${i})" style="font-size:10px;padding:2px 8px">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="delThirdParty(${i})" style="font-size:10px;padding:2px 8px">🗑</button>
+      </div>
+    </div>`).join(''):'<div class="empty"><span class="ei">🏢</span><span class="et">暂无第三方机构</span></div>'}
+    <div style="font-size:10px;color:var(--t3);margin-top:4px">第三方机构信息含营业执照照片、联系人、资质信息</div>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function addThirdParty(){
+  if(!store.thirdParties)store.thirdParties=[];
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>添加第三方机构</h3><button class="modal-close" onclick="openThirdPartyLib()">✕</button></div>
+  <div class="modal-bd">
+    <div class="form-grid">
+      <div class="form-item full"><label class="form-label"><span class="req">*</span>机构名称</label><input class="form-input" id="tp_name"></div>
+      <div class="form-item"><label class="form-label">联系人</label><input class="form-input" id="tp_contact"></div>
+      <div class="form-item"><label class="form-label">电话</label><input class="form-input" id="tp_phone"></div>
+      <div class="form-item full"><label class="form-label">资质说明</label><textarea class="form-input" id="tp_qual" rows="2" placeholder="如：直播机构MCN、品牌代理等"></textarea></div>
+      <div class="form-item full">
+        <label class="form-label">营业执照照片</label>
+        <div id="tp_img_preview" style="margin-bottom:6px"></div>
+        <input type="file" accept="image/*" onchange="previewUpload(this,'tp_img_preview')" style="font-size:12px">
+        <input type="hidden" id="tp_img_data">
+      </div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="saveThirdParty()" style="margin-top:10px">保存</button>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function editThirdParty(idx){
+  const tp=store.thirdParties[idx];
+  if(!tp)return;
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>编辑第三方 · ${tp.name}</h3><button class="modal-close" onclick="openThirdPartyLib()">✕</button></div>
+  <div class="modal-bd">
+    <div class="form-grid">
+      <div class="form-item full"><label class="form-label">机构名称</label><input class="form-input" id="tp_name" value="${tp.name||''}"></div>
+      <div class="form-item"><label class="form-label">联系人</label><input class="form-input" id="tp_contact" value="${tp.contact||''}"></div>
+      <div class="form-item"><label class="form-label">电话</label><input class="form-input" id="tp_phone" value="${tp.phone||''}"></div>
+      <div class="form-item full"><label class="form-label">资质说明</label><textarea class="form-input" id="tp_qual" rows="2">${tp.qualification||''}</textarea></div>
+      <div class="form-item full">
+        <label class="form-label">营业执照照片</label>
+        <div id="tp_img_preview" style="margin-bottom:6px">${tp.licenseImg?`<img src="${tp.licenseImg}" style="max-width:200px;max-height:100px;border-radius:4px">`:''}</div>
+        <input type="file" accept="image/*" onchange="previewUpload(this,'tp_img_preview')">
+        <input type="hidden" id="tp_img_data" value="${tp.licenseImg||''}">
+      </div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="saveThirdParty(${idx})" style="margin-top:10px">保存修改</button>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function previewUpload(input,previewId){
+  const file=input.files[0];
+  if(!file||file.size>2*1024*1024){toast('图片不能超过2MB');input.value='';return}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById(previewId).innerHTML=`<img src="${e.target.result}" style="max-width:200px;max-height:100px;border-radius:4px">`;
+    document.getElementById('tp_img_data').value=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveThirdParty(idx){
+  const name=document.getElementById('tp_name').value.trim();
+  if(!name){toast('请输入机构名称');return}
+  const data={
+    name,contact:document.getElementById('tp_contact').value.trim(),
+    phone:document.getElementById('tp_phone').value.trim(),
+    qualification:document.getElementById('tp_qual').value.trim(),
+    licenseImg:document.getElementById('tp_img_data').value||'',
+    updatedAt:new Date().toISOString().split('T')[0]
+  };
+  if(idx!==undefined){store.thirdParties[idx]=data;}
+  else{store.thirdParties.push(data);}
+  saveStore(store);
+  openThirdPartyLib();
+  toast('第三方信息已保存');
+}
+
+function delThirdParty(idx){
+  if(!confirm('确定删除该第三方机构？'))return;
+  store.thirdParties.splice(idx,1);
+  saveStore(store);
+  openThirdPartyLib();
+  toast('已删除');
+}
+
+function showFullImage(src){
+  const div=document.createElement('div');
+  div.className='img-full';
+  div.innerHTML=`<img src="${src}" onclick="this.parentElement.remove()">`;
+  div.onclick=function(e){if(e.target===div)div.remove()};
+  document.body.appendChild(div);
+}
+
+function uploadContractPhoto(input,contractId){
+  const file=input.files[0];
+  if(!file||file.size>5*1024*1024){toast('图片不能超过5MB');return}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const c=store.contracts.find(x=>x.id===contractId);
+    if(!c)return;
+    if(!c.photos)c.photos=[];
+    c.photos.push({data:e.target.result,date:new Date().toISOString().split('T')[0],uploadedBy:currentUser});
+    c.updatedAt=new Date().toISOString().split('T')[0];
+    saveStore(store);
+    closeModal();
+    openContractDetail(contractId);
+    toast('合同照片已上传');
+  };
+  reader.readAsDataURL(file);
+}
+
+function delContractPhoto(contractId,idx){
+  if(!confirm('确定删除该照片？'))return;
+  const c=store.contracts.find(x=>x.id===contractId);
+  if(!c||!c.photos)return;
+  c.photos.splice(idx,1);
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(contractId);
+  toast('照片已删除');
+}
+
+// === Export with save location prompt ===
+function exportData(){
+  const exp={exportTime:new Date().toISOString(),summary:{
+    contractCount:store.contracts.length,talentCount:store.talents.length,brandCount:store.brands.length,
+    checkinCount:store.checkins.length,totalAmount:store.contracts.reduce((s,c)=>s+c.amount,0),
+    totalPaid:store.contracts.reduce((s,c)=>s+(c.paidAmount||0),0),
+    totalGMV:store.checkins.reduce((s,c)=>s+(c.gmv||0),0)
+  },contracts:store.contracts,checkins:store.checkins,talents:store.talents,brands:store.brands};
+  const now=new Date();const ts=now.toISOString().split('T')[0];
+  const filename=`微谷云商务数据_${ts}.json`;
+  const sizeKB=Math.round(JSON.stringify(exp).length/1024);
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>📥 导出数据备份</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-bd">
+    <div class="alert alert-info" style="margin-bottom:12px">
+      <strong>导出内容：</strong>合同 ${exp.summary.contractCount} 条 · 达人 ${exp.summary.talentCount} 位 · 打卡 ${exp.summary.checkinCount} 条 · 品牌 ${exp.summary.brandCount} 个<br>
+      <strong>文件大小：</strong>约 ${sizeKB}KB · <strong>格式：</strong>JSON（可用记事本打开）
+    </div>
+    <div style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--t2);margin-bottom:6px"><strong>📁 文件将保存到：</strong></div>
+      <div style="font-size:13px;font-weight:600;word-break:break-all">浏览器默认下载目录</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">文件名：${filename}</div>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:12px">💡 提示：如需指定位置，请在浏览器设置中修改下载路径</div>
+    <button class="btn btn-green btn-block" id="btnExport" style="margin-bottom:8px">✅ 确认导出</button>
+    <button class="btn btn-white btn-block" onclick="closeModal()">取消</button>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('btnExport').onclick=function(){
+    const blob=new Blob([JSON.stringify(exp,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=filename;a.click();
+    closeModal();
+    toast('✅ 已保存到浏览器下载目录：'+filename);
+    addAuditLog('导出数据','系统备份',`${exp.summary.contractCount}合同,${exp.summary.talentCount}达人`);
+  };
+}
+
+/* Feishu sync & cloud load defined above */
+
+// === Export (remove duplicate) ===
+/* startFeishuSync, loadFromCloud, syncToCloud defined above */
+
+function importExcel(){
+  if(typeof XLSX==='undefined'){toast('Excel解析库加载中，请刷新后重试');return}
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='.xlsx,.xls,.csv';
+  inp.onchange=function(e){
+    const file=e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const data=new Uint8Array(ev.target.result);
+        const wb=XLSX.read(data,{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+        if(!rows.length){toast('文件为空');return}
+        const header=rows[0].map(h=>String(h||'').trim());
+        // Map column indices
+        const colMap={};
+        header.forEach((h,i)=>{
+          const l=h.toLowerCase();
+          if(l.includes('品牌'))colMap.brand=i;
+          if(l.includes('合同')&&l.includes('名'))colMap.contractName=i;
+          if(l.includes('金额')||l.includes('费用')||l.includes('预算'))colMap.amount=i;
+          if(l.includes('签约')||l.includes('开始'))colMap.signDate=i;
+          if(l.includes('到期')||l.includes('结束'))colMap.dueDate=i;
+          if(l.includes('达人'))colMap.talent=i;
+          if(l.includes('达人费')||l.includes('费用'))colMap.talentFee=i;
+          if(l.includes('返利')||l.includes('扣点'))colMap.rebate=i;
+          if(l.includes('第三方'))colMap.thirdParty=i;
+          if(l.includes('分配'))colMap.splitPlan=i;
+          if(l.includes('平台'))colMap.platformRebate=i;
+          if(l.includes('备注')||l.includes('说明'))colMap.remark=i;
+        });
+        // If no brand column found, try to auto-detect
+        if(colMap.brand===undefined)colMap.brand=0;
+        if(colMap.contractName===undefined)colMap.contractName=1;
+        if(colMap.amount===undefined)colMap.amount=2;
+
+        const preview=[];
+        for(let r=1;r<Math.min(rows.length,21);r++){
+          const row=rows[r];
+          if(!row||!row.some(c=>c))continue;
+          const brand=String(row[colMap.brand]||'').trim();
+          const cname=String(row[colMap.contractName]||'').trim();
+          const amount=parseFloat(String(row[colMap.amount]||'').replace(/[,，¥\s]/g,''))||0;
+          if(!brand&&!cname)continue;
+          const talent=colMap.talent!==undefined?String(row[colMap.talent]||'').trim():'';
+          const talentFee=colMap.talentFee!==undefined?parseFloat(String(row[colMap.talentFee]||'').replace(/[,，¥\s]/g,''))||0:0;
+          const rebate=colMap.rebate!==undefined?String(row[colMap.rebate]||'').trim():'';
+          const thirdParty=colMap.thirdParty!==undefined?String(row[colMap.thirdParty]||'').trim():'';
+          const splitPlan=colMap.splitPlan!==undefined?String(row[colMap.splitPlan]||'').trim():'';
+          const platformRebate=colMap.platformRebate!==undefined?String(row[colMap.platformRebate]||'').trim():'';
+          const remark=colMap.remark!==undefined?String(row[colMap.remark]||'').trim():'';
+          const signDate=colMap.signDate!==undefined?formatExcelDate(row[colMap.signDate]):'';
+          const dueDate=colMap.dueDate!==undefined?formatExcelDate(row[colMap.dueDate]):'';
+          preview.push({brand,cname,amount:amount||null,signDate,dueDate,talent,talentFee,rebate,thirdParty,splitPlan,platformRebate,remark});
+        }
+        if(!preview.length){toast('未识别到数据行');return}
+        showImportPreview(preview,header);
+      }catch(e){toast('解析失败：'+e.message)}
+    };
+    reader.readAsArrayBuffer(file);
+  };
+  inp.click();
+}
+
+function formatExcelDate(v){
+  if(!v)return'';
+  // Handle Excel serial date number
+  if(typeof v==='number'&&v>40000&&v<100000){
+    const d=new Date((v-25569)*86400000);
+    return d.toISOString().split('T')[0];
+  }
+  const s=String(v).trim();
+  // Try common date formats
+  const m=s.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  return s;
+}
+
+function showImportPreview(preview,header){
+  let importCount=0;
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>📊 导入预览 (${preview.length}条)</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+  <div class="modal-bd">
+    <div style="font-size:11px;color:var(--t2);margin-bottom:8px">识别列: ${header.slice(0,10).map(h=>`<span style="background:#E8F8EF;padding:1px 6px;border-radius:4px;margin:0 2px">${h}</span>`).join('')}${header.length>10?'...':''}</div>
+    <div style="max-height:50vh;overflow-y:auto">
+    <table class="mini-table">
+      <tr><th>品牌</th><th>合同名</th><th>金额</th><th>签约</th><th>到期</th><th>达人</th><th>达人费</th><th>返利</th></tr>
+      ${preview.map((p,i)=>`<tr id="imp_r${i}">
+        <td>${p.brand||''}</td><td>${p.cname||''}</td><td style="color:var(--r)">${p.amount?'¥'+fmt(p.amount):''}</td>
+        <td>${p.signDate||''}</td><td>${p.dueDate||''}</td><td>${p.talent||''}</td><td>${p.talentFee?'¥'+fmt(p.talentFee):''}</td><td>${p.rebate||''}</td>
+      </tr>`).join('')}
+    </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--t2)">
+      <label><input type="checkbox" id="imp_skipHead" checked> 跳过第一条 (表头)</label>
+      <span style="margin-left:10px">已选 <strong id="imp_count">0</strong> 条</span>
+    </div>
+    <div class="modal-ft" style="border:0;padding:10px 0 0">
+      <button class="btn btn-white" onclick="closeModal()">取消</button>
+      <button class="btn btn-blue" onclick="doImportExcel()">导入选中</button>
+    </div>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+  // Store preview data for import
+  window._importData=preview;
+  // Click to select rows
+  setTimeout(()=>{
+    preview.forEach((_,i)=>{
+      const tr=document.getElementById('imp_r'+i);
+      if(!tr)return;
+      tr.style.cursor='pointer';
+      tr.onclick=function(){
+        tr.classList.toggle('selected');
+        if(tr.classList.contains('selected'))tr.style.background='#E8F8EF';
+        else tr.style.background='';
+        document.getElementById('imp_count').textContent=document.querySelectorAll('#modalBox tr.selected').length;
+      };
+    });
+  },100);
+}
+
+function doImportExcel(){
+  const data=window._importData;
+  if(!data||!data.length)return;
+  const trs=document.querySelectorAll('#modalBox tr.selected');
+  let imported=0;
+  trs.forEach(tr=>{
+    const idx=parseInt(tr.id.replace('imp_r',''));
+    if(isNaN(idx))return;
+    const p=data[idx];
+    if(!p.brand||!p.cname)return;
+    const talents=[];
+    if(p.talent&&p.talentFee)talents.push({name:p.talent,fee:p.talentFee,startDate:p.signDate,endDate:p.dueDate,rebateRate:p.rebate||'',thirdParty:p.thirdParty||'',remark:p.remark||''});
+    store.contracts.push({
+      id:genId('C'),brandName:p.brand,contractName:p.cname,amount:p.amount||0,
+      signDate:p.signDate||new Date().toISOString().split('T')[0],
+      dueDate:p.dueDate||'',
+      thirdPartyRebate:p.rebate||'',splitPlan:p.splitPlan||'',platformRebate:p.platformRebate||'',
+      phase:0,nextAction:0,talents,
+      createdAt:new Date().toISOString().split('T')[0],
+      updatedAt:new Date().toISOString().split('T')[0],
+      remark:p.remark||''
+    });
+    imported++;
+  });
+  saveStore(store);
+  closeModal();
+  renderTab(currentTab);
+  addAuditLog('导入合同','Excel批量',`${imported}条`);
+  toast(`成功导入 ${imported} 条合同`);
+
+  // Add talents from imported rows only
+  trs.forEach(tr=>{
+    const idx=parseInt(tr.id.replace('imp_r',''));
+    if(isNaN(idx))return;
+    const p=data[idx];
+    if(p&&p.talent&&!store.talents.find(t=>t.name===p.talent)){
+      store.talents.push({id:'T'+String(store.talents.length+1).padStart(3,'0'),name:p.talent,platform:'',fans:'',category:'',cooperation:0,remark:'Excel导入'});
+    }
+  });
+  saveStore(store);
+}
+
+function addPayment(id){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c)return;
+  const amount=parseFloat(document.getElementById('editPayAmount').value)||0;
+  const date=document.getElementById('editPayDate').value;
+  const note=document.getElementById('editPayNote').value||'';
+  if(!amount||!date){toast('请填写回款金额和日期');return}
+  // Rule: received income cannot exceed contract income
+  const totalAmt=c.amount||0;
+  const paidSoFar=(c.paidAmount||0);
+  if(paidSoFar+amount>totalAmt){
+    toast(`❌ 回款不能超过合同收入！合同总额¥${fmt(totalAmt)}，已回¥${fmt(paidSoFar)}，本次最多还能回¥${fmt(Math.max(0,totalAmt-paidSoFar))}`);
+    return;
+  }
+  if(!c.payments)c.payments=[];
+  c.payments.push({amount,date,note,recordedBy:currentUser,recordedAt:new Date().toISOString()});
+  c.paidAmount=c.payments.reduce((s,p)=>s+p.amount,0);
+  c.paybackDate=c.payments[c.payments.length-1].date;
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(id);
+  addAuditLog('记录回款',c.brandName+' '+c.contractName,`金额:${amount} 日期:${date}`);
+  toast('回款记录已保存');
+}
+function delPayment(id,idx){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c||!c.payments)return;
+  if(!confirm('确定删除该条回款记录？'))return;
+  c.payments.splice(idx,1);
+  c.paidAmount=c.payments.reduce((s,p)=>s+p.amount,0);
+  c.paybackDate=c.payments.length?c.payments[c.payments.length-1].date:'';
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(id);
+  toast('回款记录已删除');
+}
+function savePayback(id){
+  // Legacy function - redirect to addPayment
+  addPayment(id);
+}
+
+function saveExpectedPayDate(id){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c)return;
+  c.expectedPayDate=document.getElementById('editExpectedPayDate').value||'';
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(id);
+  toast('预期回款日期已保存');
+}
+
+function addExtraNote(id){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c)return;
+  const text=prompt('请输入增项备注内容：');
+  if(!text)return;
+  if(!c.extraNotes)c.extraNotes=[];
+  c.extraNotes.unshift({text,date:new Date().toISOString().split('T')[0],author:currentUser});
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(id);
+  addAuditLog('添加增项备注',c.brandName+' '+c.contractName,text.slice(0,50));
+  toast('增项备注已添加');
+}
+
+function delExtraNote(id,idx){
+  const c=store.contracts.find(x=>x.id===id);
+  if(!c||!c.extraNotes)return;
+  if(!confirm('确定删除该备注？'))return;
+  c.extraNotes.splice(idx,1);
+  c.updatedAt=new Date().toISOString().split('T')[0];
+  saveStore(store);
+  closeModal();
+  openContractDetail(id);
+  toast('备注已删除');
+}
+
+// === Recycle Bin ===
+function openRecycleBin(){
+  trashBin=getTrash();
+  const modal=document.getElementById('modalBox');
+  const typeLabels={contract:'合同',talent:'达人',brand:'品牌'};
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>🗑 回收站 (${trashBin.length}条)</h3>
+    <div style="display:flex;gap:6px">
+    ${trashBin.length?`<button class="btn btn-red btn-sm" onclick="clearRecycleBin()">清空</button>`:''}
+    <button class="modal-close" onclick="closeModal()">✕</button></div>
+  </div>
+  <div class="modal-bd">
+    ${trashBin.length?trashBin.map((t,i)=>`<div class="checkin-item" style="cursor:default"><div><strong>${typeLabels[t.type]||t.type}</strong> · ${t.type==='contract'?t.item.brandName+' '+t.item.contractName:t.item.name} <span style="font-size:10px;color:var(--t3)">${t.deletedAt.slice(0,16)}</span></div><button class="btn btn-green btn-sm" onclick="restoreFromTrash(${i})">↩ 恢复</button></div>`).join(''):'<div class="empty"><span class="ei">🗑</span><span class="et">回收站为空</span></div>'}
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function restoreFromTrash(idx){
+  trashBin=getTrash();
+  const t=trashBin[idx];
+  if(!t)return;
+  if(t.type==='contract')store.contracts.push(t.item);
+  else if(t.type==='talent')store.talents.push(t.item);
+  else if(t.type==='brand')store.brands.push(t.item);
+  trashBin.splice(idx,1);
+  saveTrash();
+  saveStore(store);
+  closeModal();
+  renderTab(currentTab);
+  toast('已恢复！');
+}
+function clearRecycleBin(){
+  if(!confirm(`确定永久清空回收站全部 ${trashBin.length} 条记录？此操作不可恢复！`))return;
+  trashBin=[];
+  saveTrash();
+  closeModal();
+  toast('回收站已清空');
+  addAuditLog('清空回收站','系统',`清空了所有已删除记录`);
+}
+
+// === User Management (admin only) ===
+function openUserMgr(){
+  if(currentRole!=='director'){toast('仅管理员可操作');return}
+  const allUsers=getUsers();
+  const roleLabels={director:'👔 商务总监',assistant:'💼 商务助理',finance:'💰 财务总监',talent:'🎯 达人',flow_director:'🔍 流程总监'};
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>👥 用户管理 (${Object.keys(allUsers).length}人)</h3>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="modal-bd">
+    <div style="margin-bottom:12px;display:flex;gap:8px">
+      <input class="form-input" id="um_name" placeholder="姓名" style="flex:1">
+      <input class="form-input" id="um_pwd" placeholder="初始密码" value="123456" style="flex:1;max-width:120px">
+      <select class="form-select" id="um_role" style="max-width:120px">
+        <option value="talent">达人</option><option value="assistant">商务助理</option><option value="finance">财务总监</option><option value="director">商务总监</option><option value="flow_director">流程总监</option>
+      </select>
+      <button class="btn btn-green btn-sm" onclick="addUser()" style="flex-shrink:0">+ 添加</button>
+    </div>
+    <table class="mini-table">
+      <tr><th>姓名</th><th>角色</th><th>密码</th><th>操作</th></tr>
+      ${Object.entries(allUsers).map(([k,v])=>`<tr>
+        <td style="font-weight:700">${v.name||k}</td>
+        <td>${roleLabels[v.role]||v.role}</td>
+        <td><span style="font-size:10px;color:var(--t2)">${'*'.repeat(Math.min((v.pwd||'').length,6))}</span></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-blue btn-sm" onclick="resetUserPwd('${k}')">🔑</button>
+          ${k!=='admin'?`<button class="btn btn-red btn-sm" onclick="delUser('${k}')">🗑</button>`:''}
+        </td>
+      </tr>`).join('')}
+    </table>
+    <div style="font-size:10px;color:var(--t3);margin-top:8px">管理员 admin 不可删除。点击🔑重设密码为123456。财务总监初始密码为888888。</div>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function addUser(){
+  const name=document.getElementById('um_name').value.trim();
+  const pwd=document.getElementById('um_pwd').value.trim();
+  const role=document.getElementById('um_role').value;
+  if(!name){toast('请输入姓名');return}
+  if(!pwd){toast('请输入密码');return}
+  const allUsers=getUsers();
+  if(allUsers[name]){toast('该用户已存在');return}
+  allUsers[name]={name,role,pwd};
+  saveUsers(allUsers);
+  users=allUsers;
+  openUserMgr();
+  addAuditLog('添加用户',name,`角色:${role}`);
+  toast(`已添加用户：${name}`);
+}
+function delUser(key){
+  if(key==='admin'){toast('管理员不可删除');return}
+  if(!confirm(`确定删除用户 ${key}？`))return;
+  const allUsers=getUsers();
+  delete allUsers[key];
+  saveUsers(allUsers);
+  users=allUsers;
+  openUserMgr();
+  addAuditLog('删除用户',key);
+  toast(`已删除用户：${key}`);
+}
+function resetUserPwd(key){
+  const allUsers=getUsers();
+  if(!allUsers[key])return;
+  allUsers[key].pwd='123456';
+  saveUsers(allUsers);
+  users=allUsers;
+  openUserMgr();
+  addAuditLog('重置密码',key);
+  toast(`${key} 密码已重置为 123456`);
+}
+
+function openAuditLog(){
+  if(currentRole!=='director'){toast('仅管理员可查看');return}
+  const logs=getAuditLog();
+  const roleLabels={director:'商务总监',assistant:'商务助理',finance:'财务总监',talent:'达人',flow_director:'流程总监'};
+  const modal=document.getElementById('modalBox');
+  modal.innerHTML=`
+  <div class="modal-hd"><h3>📜 操作日志 (最近${Math.min(logs.length,100)}条)</h3>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-red btn-sm" onclick="if(confirm('确定清空全部操作日志？此操作不可恢复！')){clearAuditLog()}">清空</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+  </div>
+  <div class="modal-bd">
+    <div style="max-height:60vh;overflow-y:auto">
+    ${logs.length?logs.slice(0,100).map(l=>{
+      const t=new Date(l.timestamp);
+      const time=t.toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const roleCls={director:'#E84393',assistant:'#0984E3',finance:'#00B894',talent:'#F39C12'}[l.role]||'#636E72';
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--br);font-size:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span><span style="font-weight:700">${l.user}</span> <span style="font-size:10px;padding:1px 6px;border-radius:6px;background:${roleCls}22;color:${roleCls};font-weight:600">${roleLabels[l.role]||l.role}</span></span>
+          <span style="color:var(--t3);font-size:10px">${time}</span>
+        </div>
+        <div><span style="color:var(--b);font-weight:600">${l.action}</span> · ${l.target||'—'}</div>
+        ${l.details?`<div style="color:var(--t2);font-size:10px;margin-top:1px">${l.details}</div>`:''}
+      </div>`;
+    }).join(''):'<div class="empty"><span class="ei">📜</span><span class="et">暂无操作记录</span></div>'}
+    </div>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function clearAuditLog(){
+  localStorage.removeItem(AUDIT_KEY);
+  closeModal();
+  toast('操作日志已清空');
+}
+
+// === Check-in ===
+function openCheckinForm(contractId,talentName){
+  let cList=store.contracts.filter(cc=>cc.phase===3||cc.phase===2);
+  // Talent: only see their own contracts
+  if(currentRole==='talent'){
+    cList=cList.filter(cc=>cc.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)||t.name.includes(currentUser)));
+  }
+  if(!cList.length){toast('当前没有可打卡的合同');return}
+  const today=new Date().toISOString().split('T')[0];
+  const modal=document.getElementById('modalBox');
+  // Build talent options: for talent role, only show themselves
+  const talentOpts=currentRole==='talent'
+    ? cList.flatMap(cc=>cc.talents.filter(t=>t.name===currentUser||currentUser.includes(t.name)||t.name.includes(currentUser)).map(t=>`<option value="${t.name}" data-cid="${cc.id}" ${t.name===talentName&&cc.id===contractId?'selected':''}>${t.name} (${cc.brandName})</option>`)).join('')
+    : cList.flatMap(cc=>cc.talents.map(t=>`<option value="${t.name}" data-cid="${cc.id}" ${t.name===talentName&&cc.id===contractId?'selected':''}>${t.name} (${cc.brandName})</option>`)).join('');
+  modal.innerHTML=`
+  <div class="modal-hd">
+    <h3>✅ 执行打卡</h3>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="modal-bd">
+    <div class="form-grid">
+      <div class="form-item"><label class="form-label"><span class="req">*</span>关联合同</label>
+        <select class="form-select" id="ciContract">${cList.map(cc=>`<option value="${cc.id}" ${cc.id===contractId?'selected':''}>${cc.brandName} · ${cc.contractName}</option>`).join('')}</select>
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>达人</label>
+        <select class="form-select" id="ciTalent" onchange="updateTalentInfo()">${talentOpts}</select>
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>日期</label>
+        <input class="form-input" type="date" id="ciDate" value="${today}">
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>内容类型</label>
+        <select class="form-select" id="ciType"><option>直播</option><option>短视频</option><option>图文</option><option>直播+短视频</option><option>其他</option></select>
+      </div>
+      <div class="form-item"><label class="form-label">直播时长(小时)</label>
+        <input class="form-input" type="number" id="ciLiveHours" value="" min="0" step="0.5">
+      </div>
+      <div class="form-item"><label class="form-label">直播场次</label>
+        <input class="form-input" type="number" id="ciLiveCount" value="1" min="0">
+      </div>
+      <div class="form-item"><label class="form-label">视频数量</label>
+        <input class="form-input" type="number" id="ciVideoCount" value="" min="0">
+      </div>
+      <div class="form-item"><label class="form-label">观看人数</label>
+        <input class="form-input" type="number" id="ciViewers" value="" min="0">
+      </div>
+      <div class="form-item"><label class="form-label">互动量</label>
+        <input class="form-input" type="number" id="ciInteractions" value="" min="0">
+      </div>
+      <div class="form-item"><label class="form-label"><span class="req">*</span>GMV(元)</label>
+        <input class="form-input" type="number" id="ciGMV" value="" min="0">
+      </div>
+      <div class="form-item" style="grid-column:1/-1"><label class="form-label" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="ciEditDone" style="width:16px;height:16px"> 剪辑完成确认</label></div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="saveCheckin()" style="margin-top:14px">提交打卡</button>
+  </div>`;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function saveCheckin(){
+  const contractId=document.getElementById('ciContract').value;
+  const talentSel=document.getElementById('ciTalent');
+  const talentName=talentSel.value;
+  const date=document.getElementById('ciDate').value;
+  const ciType=document.getElementById('ciType').value;
+  const liveHours=parseFloat(document.getElementById('ciLiveHours').value)||0;
+  const liveCount=parseInt(document.getElementById('ciLiveCount').value)||0;
+  const videoCount=parseInt(document.getElementById('ciVideoCount').value)||0;
+  const viewers=parseInt(document.getElementById('ciViewers').value)||0;
+  const interactions=parseInt(document.getElementById('ciInteractions').value)||0;
+  const gmv=parseInt(document.getElementById('ciGMV').value)||0;
+
+  if(!talentName||!date||!ciType){toast('请填写必填项（*）');return}
+  if(!gmv){toast('请填写GMV（*）');return}
+
+  const editDone=document.getElementById('ciEditDone').checked;
+  if(!editDone){toast('请勾选「剪辑完成确认」（必填）');return}
+
+  // Same contract + same talent + same date = only 1 check-in
+  const dupCheckin=store.checkins.find(ci=>ci.contractId===contractId&&ci.talentName===talentName&&ci.date===date);
+  if(dupCheckin){toast('❌ 该项目今日已打卡，不能重复打卡');return}
+
+  // Talent: cannot check in for dates not today
+  if(currentRole==='talent'){
+    const today=new Date().toISOString().split('T')[0];
+    if(date!==today){toast('达人只能当日打卡，不能跨日期补打卡');return}
+  }
+
+  // Talent can only check in for themselves
+  if(currentRole==='talent' && talentName!==currentUser && !currentUser.includes(talentName) && !talentName.includes(currentUser)){
+    toast('只能为自己打卡');
+    return;
+  }
+
+  store.checkins.push({
+    id:'CI'+String(store.checkins.length+1).padStart(3,'0'),
+    contractId,talentName,date,type:ciType,liveHours,liveCount,videoCount,viewers,interactions,gmv,
+    editDone,confirmedBy:currentRole==='assistant'?currentUser:''
+  });
+  saveStore(store);
+  closeModal();
+  renderTab(currentTab);
+  addAuditLog('执行打卡',talentName,`GMV:${gmv} 剪辑:${editDone?'已完成':'进行中'}`);
+  toast('打卡已提交！');
+}
+
+// === Todos ===
+function getMyTodos(){
+  const todos=[];
+  const today=new Date().toISOString().split('T')[0];
+
+  store.contracts.forEach(c=>{
+    const action=ACTIONS[c.nextAction];
+    const dAgo=daysAgo(c.updatedAt);
+
+    // Urgency: urgent(red) = 超期 or 待审批>3天, warn(yellow) = 即将到期 or 待处理>1天, normal(blue) = 常规
+    function urgency(){
+      if(c.phase===7)return'normal';
+      if(action.includes('超期'))return'urgent';
+      if(dAgo>7)return'urgent';
+      if(action.includes('总监')&&dAgo>3)return'urgent';
+      if(action.includes('总监')&&dAgo>1)return'warn';
+      if(c.dueDate&&new Date(c.dueDate)<new Date()&&c.phase<7)return'urgent';
+      if(dAgo>3)return'warn';
+      return'normal';
+    }
+
+    if(currentRole==='director'){
+      if(action.includes('总监')||c.phase<1)
+        todos.push({type:'approve',c,action,urgency:urgency()});
+    }
+    if(currentRole==='assistant'){
+      if(action.includes('达人')||action.includes('助理')||c.phase>=2&&c.phase<=4)
+        todos.push({type:'exec',c,action,urgency:urgency()});
+    }
+    if(currentRole==='finance'){
+      if(action.includes('财务')||c.phase>=5&&c.phase<=6)
+        todos.push({type:'finance',c,action,urgency:urgency()});
+    }
+    if(currentRole==='talent'){
+      const myTalents=c.talents.filter(t=>
+        t.name.includes(currentUser)||currentUser.includes(t.name)
+      );
+      if(myTalents.length>0){
+        if(c.phase===3)todos.push({type:'checkin',c,action:'今日打卡',urgency:'urgent'});
+        if(c.phase===2)todos.push({type:'checkin',c,action:'等待执行',urgency:'warn'});
+        if(c.phase>3&&c.phase<7)todos.push({type:'checkin',c,action:'已执行（查看）',urgency:'normal'});
+      }
+    }
+  });
+
+  // Pending checkin confirmations for assistant
+  if(currentRole==='assistant'){
+    const pending=store.checkins.filter(ci=>!ci.confirmedBy);
+    pending.forEach(ci=>{
+      const c=store.contracts.find(x=>x.id===ci.contractId);
+      if(c){
+        const dAgo=daysAgo(ci.date);
+        todos.push({type:'confirm',c,action:`确认 ${ci.talentName} ${ci.date} 打卡`,ci,urgency:dAgo>3?'urgent':dAgo>1?'warn':'normal'});
+      }
+    });
+  }
+
+  // Sort: urgent first, then warn, then normal
+  const urgencyOrder={urgent:0,warn:1,normal:2};
+  todos.sort((a,b)=>urgencyOrder[a.urgency]-urgencyOrder[b.urgency]);
+  return todos;
+}
+
+function renderTodos(mc){
+  const todos=getMyTodos();
+  const icons={approve:'👔',exec:'💼',finance:'💰',checkin:'🎯',confirm:'✓'};
+  const labels={urgent:'紧急',warn:'提醒',normal:'正常'};
+  const labelCls={urgent:'u',warn:'w',normal:'n'};
+  const urgCount=todos.filter(t=>t.urgency==='urgent').length;
+  const warnCount=todos.filter(t=>t.urgency==='warn').length;
+
+  mc.innerHTML=`
+    <div class="section">
+      <div class="section-title">我的待办 <span style="font-weight:400;color:var(--t2)">(${todos.length})</span>
+        <span style="font-size:11px;font-weight:400">
+          <span style="color:var(--r)">🔴${urgCount}</span>
+          <span style="color:#B8860B;margin-left:4px">🟡${warnCount}</span>
+        </span>
+      </div>
+    </div>
+    <div class="todo-list">
+      ${todos.length?todos.map(t=>`
+        <div class="todo-item ${t.urgency}" onclick="openContractDetail('${t.c.id}')">
+          <span class="todo-icon">${icons[t.type]||'📌'}</span>
+          <div class="todo-info">
+            <div class="todo-title">${t.action}</div>
+            <div class="todo-desc">${t.c.brandName} · ${t.c.contractName} | ${PHASES[t.c.phase]}</div>
+          </div>
+          <span class="todo-urgent ${labelCls[t.urgency]}">${labels[t.urgency]}</span>
+          <span class="todo-arrow">→</span>
+        </div>
+      `).join(''):'<div class="empty"><span class="ei">🎉</span><span class="et">暂无待办，干得漂亮！</span></div>'}
+    </div>
+  `;
+  updateBadge();
+}
+
+// === Dashboard ===
+function renderDashboard(mc){
+  const totalAmount=store.contracts.reduce((s,c)=>s+c.amount,0);
+  const totalPaid=store.contracts.reduce((s,c)=>s+(c.paidAmount||0),0);
+
+  // Phase distribution
+  const phaseCounts=Array(8).fill(0);
+  store.contracts.forEach(c=>{if(c.phase<8)phaseCounts[c.phase]++});
+  const maxPhase=Math.max(1,...phaseCounts);
+
+  if(currentRole==='talent'){
+    // Talent: my performance only
+    const myCheckins=store.checkins.filter(ci=>ci.talentName===currentUser||currentUser.includes(ci.talentName));
+    const myGMV=myCheckins.reduce((s,c)=>s+(c.gmv||0),0);
+    const myContracts=store.contracts.filter(c=>c.talents.some(t=>t.name===currentUser||currentUser.includes(t.name)));
+    const today=new Date().toISOString().split('T')[0];
+    const todayChk=myCheckins.filter(c=>c.date===today);
+    mc.innerHTML=`
+      <div class="alert">🎯 ${currentUser} 的工作看板</div>
+      <div class="dash-kpis">
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--b)">${myContracts.length}</div><div class="dk-label">我的合同</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:#FF9500">¥${fmt(myGMV)}</div><div class="dk-label">我的总GMV</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--g)">${myCheckins.length}</div><div class="dk-label">打卡次数</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:${todayChk.length?'var(--g)':'var(--r)'}">${todayChk.length?'✓已打卡':'未打卡'}</div><div class="dk-label">今日状态</div></div>
+      </div>
+      <div class="dash-chart"><h4>📋 我的合同进度</h4>
+        ${myContracts.map(c=>{
+          const myTalent=c.talents.find(t=>t.name===currentUser||currentUser.includes(t.name));
+          const chk=getTalentCheckins(myTalent?.name||currentUser,c.id);
+          const start=new Date(myTalent?.startDate||c.signDate);
+          const end=new Date(myTalent?.endDate||c.dueDate);
+          const totalDays=Math.max(1,(end-start)/(86400000));
+          const elapsed=Math.min(totalDays,Math.max(0,(new Date()-start)/(86400000)));
+          const pct=Math.round(elapsed/totalDays*100);
+          return `<div style="margin-bottom:12px" onclick="openContractDetail('${c.id}')" style="cursor:pointer">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <strong>${c.brandName} · ${c.contractName}</strong>
+              <span style="color:var(--r);font-weight:700">¥${fmt(myTalent?.fee||0)}</span>
+            </div>
+            <div style="font-size:10px;color:var(--t2);margin-bottom:3px">
+              ${myTalent?.startDate||''} ~ ${myTalent?.endDate||''} | 打卡${chk.length}次 | 状态：${PHASES[c.phase]}
+            </div>
+            <div class="pbar-w"><div class="pbar"><div class="pfill ${c.phase>=4?'done':pct>80?'done':'act'}" style="width:${pct}%"></div></div><span class="ptxt">${pct}%</span></div>
+          </div>`;
+        }).join('')||'<div class="empty"><span class="ei">📭</span><span class="et">暂无我的合同</span></div>'}
+      </div>
+      <div style="text-align:center;padding:10px"><button class="btn btn-blue btn-sm" onclick="exportData()">📥 导出我的数据</button></div>
+    `;return;
+  }
+
+  if(currentRole==='assistant'){
+    // Assistant: full pipeline view, focused on execution monitoring
+    const pendingCheckins=store.checkins.filter(ci=>!ci.confirmedBy);
+    const todayCheckins=store.checkins.filter(ci=>ci.date===new Date().toISOString().split('T')[0]);
+    mc.innerHTML=`
+      <div class="alert alert-info">💼 商务助理工作台 · 执行监控视角</div>
+      <div class="dash-kpis">
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--b)">${store.contracts.length}</div><div class="dk-label">全盘合同</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--r)">${pendingCheckins.length}</div><div class="dk-label">待确认打卡</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--g)">${todayCheckins.length}</div><div class="dk-label">今日打卡</div></div>
+        <div class="dash-kpi"><div class="dk-num">${store.contracts.filter(c=>c.phase>=2&&c.phase<=4).length}</div><div class="dk-label">执行中合同</div></div>
+      </div>
+      <div class="dash-chart"><h4>📊 合同阶段总览</h4>
+        <div class="bar-chart">
+          ${PHASES.map((p,i)=>`<div class="bar-row"><span class="bar-label">${p}</span><div class="bar-track"><div class="bar-fill" style="width:${(phaseCounts[i]/maxPhase*100)}%;background:var(--ph${i})"></div></div><span class="bar-count">${phaseCounts[i]}</span></div>`).join('')}
+        </div>
+      </div>
+      ${pendingCheckins.length?`
+      <div class="dash-chart"><h4>⏳ 待确认打卡 (${pendingCheckins.length})</h4>
+        ${pendingCheckins.map(ci=>`<div class="checkin-item" style="cursor:pointer" onclick="confirmCheckin('${ci.id}')"><div><span class="ci-date">${ci.date}</span> <span style="margin-left:6px">${ci.talentName} · ${ci.type} · ${ci.liveHours}h</span></div><span class="ci-gmv">GMV ¥${fmt(ci.gmv||0)}</span></div>`).join('')}
+      </div>`:''}
+      <div style="text-align:center;padding:10px"><button class="btn btn-blue btn-sm" onclick="exportData()">📥 导出数据</button></div>
+    `;return;
+  }
+
+  if(currentRole==='finance'){
+    // Finance: full settlement & recovery view
+    const totalGMV=store.checkins.reduce((s,c)=>s+(c.gmv||0),0);
+    const overdue=store.contracts.filter(c=>c.phase<7&&new Date(c.dueDate)<new Date());
+    const allPayments=store.contracts.filter(c=>c.payments&&c.payments.length).flatMap(c=>(c.payments||[]).map(p=>({...p,brand:c.brandName,contract:c.contractName,amount2:c.amount}))).sort((a,b)=>new Date(b.date)-new Date(a.date));
+    mc.innerHTML=`
+      <div class="alert alert-info">💰 财务工作台 · 结算与回款全貌</div>
+      <div class="dash-kpis">
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--r)">¥${fmt(totalAmount)}</div><div class="dk-label">合同总金额</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:var(--g)">¥${fmt(totalPaid)}</div><div class="dk-label">已回款金额</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:#FF9500">¥${fmt(totalAmount-totalPaid)}</div><div class="dk-label">待收金额</div></div>
+        <div class="dash-kpi"><div class="dk-num" style="color:${overdue.length?'var(--r)':'var(--g)'}">${overdue.length}</div><div class="dk-label">超期未归档</div></div>
+      </div>
+      <div class="dash-chart"><h4>💰 全盘回款明细</h4>
+        <table class="mini-table">
+          <tr><th>合同</th><th>品牌</th><th class="right">金额</th><th class="right">已回款</th><th class="right">回款率</th><th class="right">待收</th></tr>
+          ${[...store.contracts].sort((a,b)=>{
+            const ra=a.amount?((a.paidAmount||0)/a.amount):0;
+            const rb=b.amount?((b.paidAmount||0)/b.amount):0;
+            return ra-rb;
+          }).map(c=>{
+            const rate=c.amount?Math.round((c.paidAmount||0)/c.amount*100):0;
+            const rateCls=rate>=100?'var(--g)':rate>=50?'#FF9500':'var(--r)';
+            return `<tr style="cursor:pointer" onclick="openContractDetail('${c.id}')">
+              <td>${c.contractName}</td><td>${c.brandName}</td>
+              <td class="right" style="color:var(--r)">¥${fmt(c.amount)}</td>
+              <td class="right" style="color:var(--g)">¥${fmt(c.paidAmount||0)}</td>
+              <td class="right" style="color:${rateCls};font-weight:700">${rate}%</td>
+              <td class="right" style="color:var(--r)">¥${fmt(c.amount-(c.paidAmount||0))}</td>
+            </tr>`;
+          }).join('')}
+        </table>
+      </div>
+      ${allPayments.length?`
+      <div class="dash-chart"><h4>💳 全部回款记录 (${allPayments.length}条)</h4>
+        <div class="payment-list" style="max-height:400px">
+          ${allPayments.map(p=>`<div class="payment-item"><div><strong>${p.brand}</strong> · ${p.contract}<br><span style="font-size:10px;color:var(--t2)">${p.date}${p.note?' · '+p.note:''}${p.recordedBy?' · 操作:'+p.recordedBy:''}</span></div><span class="pay-amount">+¥${fmt(p.amount)}</span></div>`).join('')}
+        </div>
+      </div>`:''}
+      <div style="text-align:center;padding:10px"><button class="btn btn-blue btn-sm" onclick="exportData()">📥 导出财务数据</button></div>
+    `;return;
+  }
+
+  // Director: full dashboard
+  const totalFee=store.contracts.reduce((s,c)=>s+c.talents.reduce((ss,t)=>ss+(t.fee||0),0),0);
+  const totalGMV=store.checkins.reduce((s,c)=>s+(c.gmv||0),0);
+  const topContracts=[...store.contracts].sort((a,b)=>b.amount-a.amount).slice(0,5);
+  const talentGMV={};
+  store.checkins.forEach(c=>{talentGMV[c.talentName]=(talentGMV[c.talentName]||0)+(c.gmv||0)});
+  const topTalents=Object.entries(talentGMV).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+  mc.innerHTML=`
+    <div class="dash-kpis">
+      <div class="dash-kpi"><div class="dk-num" style="color:var(--b)">${store.contracts.length}</div><div class="dk-label">总合同数</div></div>
+      <div class="dash-kpi"><div class="dk-num" style="color:var(--r)">¥${fmt(totalAmount)}</div><div class="dk-label">合同总金额</div></div>
+      <div class="dash-kpi"><div class="dk-num" style="color:var(--g)">¥${fmt(totalPaid)}</div><div class="dk-label">已回款金额</div></div>
+      <div class="dash-kpi"><div class="dk-num" style="color:#FF9500">¥${fmt(totalGMV)}</div><div class="dk-label">达人总GMV</div></div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="dash-chart">
+        <h4>📊 合同阶段分布</h4>
+        <div class="bar-chart">
+          ${PHASES.map((p,i)=>`<div class="bar-row"><span class="bar-label">${p}</span><div class="bar-track"><div class="bar-fill" style="width:${(phaseCounts[i]/maxPhase*100)}%;background:var(--ph${i})"></div></div><span class="bar-count">${phaseCounts[i]}</span></div>`).join('')}
+        </div>
+      </div>
+      <div class="dash-chart">
+        <h4>🏆 TOP 5 达人GMV</h4>
+        <div class="bar-chart">
+          ${topTalents.length?topTalents.map(([n,g])=>{const maxG=topTalents[0][1]||1;return`<div class="bar-row"><span class="bar-label" style="width:70px">${n}</span><div class="bar-track"><div class="bar-fill" style="width:${(g/maxG*100)}%;background:var(--g)"></div></div><span class="bar-count" style="width:50px">¥${fmt(g)}</span></div>`}).join(''):'<div style="text-align:center;color:var(--t3)">暂无数据</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-chart">
+      <h4>📋 合同金额 TOP 5</h4>
+      <table class="mini-table">
+        <tr><th>合同</th><th>品牌</th><th>阶段</th><th class="right">金额</th><th class="right">已回款</th></tr>
+        ${topContracts.map(c=>`<tr><td>${c.contractName}</td><td>${c.brandName}</td><td>${phaseTag(c.phase)}</td><td class="right" style="color:var(--r)">¥${fmt(c.amount)}</td><td class="right" style="color:var(--g)">¥${fmt(c.paidAmount||0)}</td></tr>`).join('')}
+      </table>
+    </div>
+    <div class="dash-chart" style="text-align:center;padding:12px">
+      <button class="btn btn-blue" onclick="exportData()">📥 导出全部数据（JSON）</button>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">合同/达人/品牌/打卡全量数据</div>
+    </div>
+  `;
+}
+
+// Quick confirm checkin (for assistant dashboard)
+function confirmCheckin(id){
+  const ci=store.checkins.find(x=>x.id===id);
+  if(!ci)return;
+  ci.confirmedBy=currentUser;
+  saveStore(store);
+  renderTab('dashboard');
+  toast(`已确认 ${ci.talentName} 的打卡`);
+}
+
+// === Modal ===
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.getElementById('modalBox').innerHTML='';
+}
+
+// Init
+updateBadge();
+</script>
+</body>
+</html>
