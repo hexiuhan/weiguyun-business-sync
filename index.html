@@ -1972,7 +1972,7 @@ function clearRecycleBin(){
 function openUserMgr(){
   if(currentRole!=='director'){toast('仅管理员可操作');return}
   const allUsers=getUsers();
-  const roleLabels={director:'👔 商务总监',assistant:'💼 商务助理',finance:'💰 财务总监',talent:'🎯 达人',flow_director:'🔍 流程总监'};
+  const roleLabels={director:'👔 管理者(商务总监)',assistant:'💼 商务助理',finance:'💰 财务总监',talent:'🎯 达人',flow_director:'🔍 流程总监'};
   const modal=document.getElementById('modalBox');
   modal.innerHTML=`
   <div class="modal-hd"><h3>👥 用户管理 (${Object.keys(allUsers).length}人)</h3>
@@ -1999,7 +1999,7 @@ function openUserMgr(){
         </td>
       </tr>`).join('')}
     </table>
-    <div style="font-size:10px;color:var(--t3);margin-top:8px">管理员 admin 不可删除。点击🔑重设密码为123456。财务总监初始密码为888888。</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:8px">管理者(商务总监)可自由增删。点击🔑重设密码为123456。财务总监初始密码为888888。删除最后一位管理者后需重新添加方可再次进入本界面。</div>
   </div>`;
   document.getElementById('modalOverlay').classList.add('show');
 }
@@ -2019,14 +2019,24 @@ function addUser(){
   toast(`已添加用户：${name}`);
 }
 function delUser(key){
-  if(key==='admin'){toast('管理员不可删除');return}
-  if(!confirm(`确定删除用户 ${key}？`))return;
   const allUsers=getUsers();
+  const isDirector=allUsers[key]&&allUsers[key].role==='director';
+  const directorCount=Object.values(allUsers).filter(u=>u.role==='director').length;
+  if(isDirector&&directorCount<=1){
+    if(!confirm(`⚠️ ${key} 是当前唯一的管理者。删除后将无人能进入用户管理，确定继续？`))return;
+  } else {
+    if(!confirm(`确定删除用户 ${key}？`))return;
+  }
   delete allUsers[key];
   saveUsers(allUsers);
   users=allUsers;
-  openUserMgr();
   addAuditLog('删除用户',key);
+  if(currentUser===key){
+    toast(`已删除用户：${key}，即将退出登录`);
+    setTimeout(()=>location.reload(),800);
+    return;
+  }
+  openUserMgr();
   toast(`已删除用户：${key}`);
 }
 function resetUserPwd(key){
@@ -2043,7 +2053,7 @@ function resetUserPwd(key){
 function openAuditLog(){
   if(currentRole!=='director'){toast('仅管理员可查看');return}
   const logs=getAuditLog();
-  const roleLabels={director:'商务总监',assistant:'商务助理',finance:'财务总监',talent:'达人',flow_director:'流程总监'};
+  const roleLabels={director:'管理者(商务总监)',assistant:'商务助理',finance:'财务总监',talent:'达人',flow_director:'流程总监'};
   const modal=document.getElementById('modalBox');
   modal.innerHTML=`
   <div class="modal-hd"><h3>📜 操作日志 (最近${Math.min(logs.length,100)}条)</h3>
