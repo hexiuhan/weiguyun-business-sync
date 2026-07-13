@@ -2,6 +2,14 @@
   "exportTime": "2026-07-13T15:29:43.231Z",
   "contracts": [
     {
+      "id": "TEST_A",
+      "brand": "同步测试A",
+      "amount": 5000,
+      "paidAmount": 0,
+      "phase": 0,
+      "updatedAt": "2026-07-13T16:22:00.980Z"
+    },
+    {
       "id": "C001",
       "brandName": "苏芙拉",
       "contractName": "种草",
