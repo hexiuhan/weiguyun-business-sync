@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T14:40:39.776Z",
+  "exportTime": "2026-07-13T14:40:57.274Z",
   "contracts": [
     {
       "id": "C001",
@@ -47,7 +47,18 @@
       "phaseConfirmers": {
         "phase4": "director_admin",
         "phase5": "finance_财务"
-      }
+      },
+      "payments": [
+        {
+          "amount": 8000,
+          "date": "2026-07-13",
+          "note": "",
+          "recordedBy": "财务",
+          "recordedAt": "2026-07-13T14:40:56.356Z"
+        }
+      ],
+      "paidAmount": 8000,
+      "paybackDate": "2026-07-13"
     }
   ],
   "talents": [
