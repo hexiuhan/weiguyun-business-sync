@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T15:19:37.283Z",
+  "exportTime": "2026-07-13T15:29:43.231Z",
   "contracts": [
     {
       "id": "C001",
@@ -55,16 +55,9 @@
           "note": "",
           "recordedBy": "财务",
           "recordedAt": "2026-07-13T14:40:56.356Z"
-        },
-        {
-          "amount": 10000,
-          "date": "2026-07-13",
-          "note": "2000",
-          "recordedBy": "熊嘉琳",
-          "recordedAt": "2026-07-13T14:46:18.034Z"
         }
       ],
-      "paidAmount": 18000,
+      "paidAmount": 8000,
       "paybackDate": "2026-07-13"
     }
   ],
@@ -86,15 +79,6 @@
       "category": "视频内容",
       "cooperation": 0,
       "remark": ""
-    },
-    {
-      "id": "T003",
-      "name": "念念妈",
-      "platform": "抖音",
-      "fans": "20万",
-      "category": "直播",
-      "cooperation": 0,
-      "remark": ""
     }
   ],
   "checkins": [],
@@ -104,14 +88,6 @@
       "id": "B001",
       "name": "苏芙拉",
       "type": "苏芙拉",
-      "parent": "",
-      "contact": "",
-      "remark": ""
-    },
-    {
-      "id": "B002",
-      "name": "伊利",
-      "type": "QQ星榛高",
       "parent": "",
       "contact": "",
       "remark": ""
