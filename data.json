@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T18:06:49.908378",
+  "exportTime": "2026-07-13T12:23:59.408Z",
   "contracts": [
     {
       "id": "C001",
@@ -12,8 +12,8 @@
       "thirdPartyRebate": "30%给喵哥",
       "splitPlan": "公司50%达人50%",
       "platformRebate": "5%",
-      "phase": 4,
-      "nextAction": 4,
+      "phase": 5,
+      "nextAction": 5,
       "talents": [
         {
           "name": "皮皮奶爸",
@@ -35,7 +35,7 @@
         }
       ],
       "createdAt": "2026-07-10",
-      "updatedAt": "2026-07-10",
+      "updatedAt": "2026-07-13",
       "expectedPayDate": "2026-07-13",
       "extraNotes": [
         {
@@ -43,7 +43,10 @@
           "date": "2026-07-10",
           "author": "熊嘉琳"
         }
-      ]
+      ],
+      "phaseConfirmers": {
+        "phase4": "director_熊嘉琳"
+      }
     }
   ],
   "talents": [
