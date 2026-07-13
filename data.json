@@ -59,13 +59,6 @@
       ],
       "paidAmount": 8000,
       "paybackDate": "2026-07-13"
-    },
-    {
-      "id": "C_TEST_SYNC",
-      "brandName": "__SYNC_TEST__",
-      "amount": 1,
-      "phase": 0,
-      "updatedAt": "2026-07-13"
     }
   ],
   "talents": [
