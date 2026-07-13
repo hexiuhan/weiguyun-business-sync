@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T14:39:31.962Z",
+  "exportTime": "2026-07-13T14:40:17.718Z",
   "contracts": [
     {
       "id": "C001",
@@ -12,8 +12,8 @@
       "thirdPartyRebate": "30%给喵哥",
       "splitPlan": "公司50%达人50%",
       "platformRebate": "5%",
-      "phase": 5,
-      "nextAction": 5,
+      "phase": 6,
+      "nextAction": 6,
       "talents": [
         {
           "name": "皮皮奶爸",
@@ -45,7 +45,8 @@
         }
       ],
       "phaseConfirmers": {
-        "phase4": "director_admin"
+        "phase4": "director_admin",
+        "phase5": "finance_财务"
       }
     }
   ],
