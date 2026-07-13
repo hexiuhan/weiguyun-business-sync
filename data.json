@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T14:46:48.320Z",
+  "exportTime": "2026-07-13T15:18:37.978Z",
   "contracts": [
     {
       "id": "C001",
@@ -95,6 +95,14 @@
       "id": "B001",
       "name": "苏芙拉",
       "type": "苏芙拉",
+      "parent": "",
+      "contact": "",
+      "remark": ""
+    },
+    {
+      "id": "B002",
+      "name": "伊利",
+      "type": "QQ星榛高",
       "parent": "",
       "contact": "",
       "remark": ""
