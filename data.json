@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T15:18:37.978Z",
+  "exportTime": "2026-07-13T15:19:37.283Z",
   "contracts": [
     {
       "id": "C001",
@@ -84,6 +84,15 @@
       "platform": "快手",
       "fans": "12万",
       "category": "视频内容",
+      "cooperation": 0,
+      "remark": ""
+    },
+    {
+      "id": "T003",
+      "name": "念念妈",
+      "platform": "抖音",
+      "fans": "20万",
+      "category": "直播",
       "cooperation": 0,
       "remark": ""
     }
