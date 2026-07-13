@@ -1,1 +1,82 @@
-{"updated":"2026-07-11T17:02:53+00:00","source":"feishu-base"}
+{
+  "exportTime": "2026-07-13T18:06:49.908378",
+  "contracts": [
+    {
+      "id": "C001",
+      "brandName": "苏芙拉",
+      "contractName": "种草",
+      "amount": 10000,
+      "signDate": "2026-07-10",
+      "dueDate": "2026-07-27",
+      "attachment": "",
+      "thirdPartyRebate": "30%给喵哥",
+      "splitPlan": "公司50%达人50%",
+      "platformRebate": "5%",
+      "phase": 4,
+      "nextAction": 4,
+      "talents": [
+        {
+          "name": "皮皮奶爸",
+          "fee": 5000,
+          "rebateRate": "0",
+          "startDate": "2026-07-10",
+          "endDate": "2026-07-20",
+          "thirdParty": "",
+          "remark": ""
+        },
+        {
+          "name": "行走的奶粉桶",
+          "fee": 5000,
+          "rebateRate": "15%",
+          "startDate": "2026-07-10",
+          "endDate": "2026-07-30",
+          "thirdParty": "",
+          "remark": ""
+        }
+      ],
+      "createdAt": "2026-07-10",
+      "updatedAt": "2026-07-10",
+      "expectedPayDate": "2026-07-13",
+      "extraNotes": [
+        {
+          "text": "一场直播",
+          "date": "2026-07-10",
+          "author": "熊嘉琳"
+        }
+      ]
+    }
+  ],
+  "talents": [
+    {
+      "id": "T001",
+      "name": "皮皮奶爸",
+      "platform": "抖音",
+      "fans": "25万",
+      "category": "直播",
+      "cooperation": 0,
+      "remark": ""
+    },
+    {
+      "id": "T002",
+      "name": "行走的奶粉桶",
+      "platform": "快手",
+      "fans": "12万",
+      "category": "视频内容",
+      "cooperation": 0,
+      "remark": ""
+    }
+  ],
+  "checkins": [],
+  "payments": [],
+  "brands": [
+    {
+      "id": "B001",
+      "name": "苏芙拉",
+      "type": "苏芙拉",
+      "parent": "",
+      "contact": "",
+      "remark": ""
+    }
+  ],
+  "thirdParties": []
+}
