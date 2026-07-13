@@ -1,5 +1,5 @@
 {
-  "exportTime": "2026-07-13T14:40:57.274Z",
+  "exportTime": "2026-07-13T14:46:26.710Z",
   "contracts": [
     {
       "id": "C001",
@@ -55,9 +55,16 @@
           "note": "",
           "recordedBy": "财务",
           "recordedAt": "2026-07-13T14:40:56.356Z"
+        },
+        {
+          "amount": 10000,
+          "date": "2026-07-13",
+          "note": "2000",
+          "recordedBy": "熊嘉琳",
+          "recordedAt": "2026-07-13T14:46:18.034Z"
         }
       ],
-      "paidAmount": 8000,
+      "paidAmount": 18000,
       "paybackDate": "2026-07-13"
     }
   ],
